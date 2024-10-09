@@ -5,7 +5,7 @@ import java.util.List;
 public class Main {
     public static void main(String[] args) {
 
-        DivideAndConquerTaskClass<int[], int[]> mergesortTask = new DivideAndConquerTaskClass<>(Main::bubblesort,
+        DivideAndConquerTask<int[], int[]> mergesortTask = new DivideAndConquerTask<>(Main::bubblesort,
                                                                                                 Main::splitArray,
                                                                                                 Main::joinArray,
                                                                                                 Main::arraySizeQuantifier);
