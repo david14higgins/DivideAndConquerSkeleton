@@ -41,6 +41,10 @@ public class DivideAndConquerTask<P, S> {
     }
 
     /*
+        Create ForkJoinPool version!
+     */
+
+    /*
         Consider building a problem generator
         This is the inverse to a problem quantifier
         It takes a problem quantity (an integer) and produces a sample problem input
@@ -50,8 +54,6 @@ public class DivideAndConquerTask<P, S> {
         level of granularity and parallelism
         Can then create a mapping of problem quantity to granularity parameters
         Should it be a mapping? Or simply one granularity value that is optimal for all problem quantities on a system
-
-
      */
 
 }
