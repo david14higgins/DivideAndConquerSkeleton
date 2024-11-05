@@ -15,22 +15,25 @@ public class DaCRecursiveTask <P, S> extends RecursiveTask<S> {
 
     private final P problem;
 
+    private final int GRANULARITY;
+
     public DaCRecursiveTask(Function<P, S> problemSolver,
                                 Function<P, List<P>> subproblemGenerator,
                                 Function<List<S>, S> solutionCombiner,
                                 Function<P, Integer> problemQuantifier,
-                                P problem) {
+                                P problem,
+                                int granularity) {
         this.problemSolver = problemSolver;
         this.subproblemGenerator = subproblemGenerator;
         this.solutionCombiner = solutionCombiner;
         this.problemQuantifier = problemQuantifier;
         this.problem = problem;
+        this.GRANULARITY = granularity;
     }
     @Override
     protected S compute() {
         // Base case: if problem is small enough, solve directly
-        int granularity = 1;
-        if (problemQuantifier.apply(problem) <= granularity) {
+        if (problemQuantifier.apply(problem) <= GRANULARITY) {
             return problemSolver.apply(problem);
         } else {
             // Otherwise, divide the problem and solve subproblems in parallel
@@ -39,7 +42,7 @@ public class DaCRecursiveTask <P, S> extends RecursiveTask<S> {
 
             // Fork a task for each subproblem
             for (P subproblem : subproblems) {
-                DaCRecursiveTask<P, S> task = new DaCRecursiveTask<>(problemSolver, subproblemGenerator, solutionCombiner, problemQuantifier, subproblem);
+                DaCRecursiveTask<P, S> task = new DaCRecursiveTask<>(problemSolver, subproblemGenerator, solutionCombiner, problemQuantifier, subproblem, GRANULARITY);
                 tasks.add(task);
                 task.fork(); // Asynchronously execute the task
             }

@@ -12,26 +12,56 @@ public class DaCProblemDefinition<P, S>{
 
     private final Function<P, Integer> problemQuantifier;
 
+    private final Function<Integer, P> problemGenerator;
+
+    private final int GRANULARITY;
+
 
     public DaCProblemDefinition(Function<P, S> problemSolver,
                                 Function<P, List<P>> subproblemGenerator,
                                 Function<List<S>, S> solutionCombiner,
-                                Function<P, Integer> problemQuantifier) {
+                                Function<P, Integer> problemQuantifier,
+                                Function<Integer, P> problemGenerator,
+                                int granularity) {
         this.problemSolver = problemSolver;
         this.subproblemGenerator = subproblemGenerator;
         this.solutionCombiner = solutionCombiner;
         this.problemQuantifier = problemQuantifier;
+        this.problemGenerator = problemGenerator;
+        this.GRANULARITY = granularity;
     }
 
     public S solveProblem(P problem) {
         ForkJoinPool pool = new ForkJoinPool();
-        DaCRecursiveTask<P, S> daCRecursiveTask = new DaCRecursiveTask<>(problemSolver, subproblemGenerator, solutionCombiner, problemQuantifier, problem);
+        DaCRecursiveTask<P, S> daCRecursiveTask = new DaCRecursiveTask<>(problemSolver, subproblemGenerator, solutionCombiner, problemQuantifier, problem, GRANULARITY);
         return pool.invoke(daCRecursiveTask);
     }
 
-    /*
-        Create ForkJoinPool version!
-     */
+    public void modelProblemSolver() {
+        int maxProblemQuantity = 10;
+
+        long[] durations = new long[10];
+
+        for (int i = 1; i <= maxProblemQuantity; i++) {
+            P generatedProblem = problemGenerator.apply(i);
+            long startTime = System.nanoTime();
+            S result = problemSolver.apply(generatedProblem);
+            long endTime = System.nanoTime();
+            long duration = endTime - startTime;
+            durations[i-1] = duration;
+        }
+
+        double durationScaleAccum = 0;
+        for (int j = 0; j < durations.length - 1; j++) {
+            double durationScale = (double) durations[j + 1] / durations[j];
+            System.out.println("Duration Scale from quantity " + (j + 1) + " to " + (j + 2) + ": " + durationScale);
+            durationScaleAccum += durationScale;
+        }
+        double averageDurationScale = durationScaleAccum / (durations.length - 1);
+        System.out.println("Average duration scale: " + averageDurationScale);
+
+    }
+
 
     /*
         Consider building a problem generator
