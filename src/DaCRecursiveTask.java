@@ -35,18 +35,18 @@ public class DaCRecursiveTask <P, S> extends RecursiveTask<S> {
         } else {
             // Otherwise, divide the problem and solve subproblems in parallel
             List<P> subproblems = subproblemGenerator.apply(problem);
-            List<DaCProblemDefinition<P, S>> tasks = new ArrayList<>();
+            List<DaCRecursiveTask<P, S>> tasks = new ArrayList<>();
 
             // Fork a task for each subproblem
             for (P subproblem : subproblems) {
-                DaCProblemDefinition<P, S> task = new DaCProblemDefinition<>(problemSolver, subproblemGenerator, solutionCombiner, problemQuantifier, subproblem);
+                DaCRecursiveTask<P, S> task = new DaCRecursiveTask<>(problemSolver, subproblemGenerator, solutionCombiner, problemQuantifier, subproblem);
                 tasks.add(task);
                 task.fork(); // Asynchronously execute the task
             }
 
             // Collect results by joining tasks
             List<S> solutions = new ArrayList<>();
-            for (DaCProblemDefinition<P, S> task : tasks) {
+            for (DaCRecursiveTask<P, S> task : tasks) {
                 solutions.add(task.join()); // Wait for task to complete and get result
             }
 

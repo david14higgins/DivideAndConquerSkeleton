@@ -1,4 +1,5 @@
 import java.io.*;
+import java.lang.reflect.AnnotatedArrayType;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -24,14 +25,14 @@ public class StrassensMatrixMultiplication {
                 {13, 14, 15, 16}};
         List<int[][]> problem = new ArrayList<>(Arrays.asList(matrixA, matrixB));
 
-        DaCProblemDefinition<List<int[][]>, int[][]> strassensTask = new DaCProblemDefinition<>(StrassensMatrixMultiplication::naiveMultiply,
+        DaCProblemDefinition<List<int[][]>, int[][]> strassensDaC = new DaCProblemDefinition<>(
+                StrassensMatrixMultiplication::naiveMultiply,
                 StrassensMatrixMultiplication::createSubprolems,
                 StrassensMatrixMultiplication::joinMatrices,
-                StrassensMatrixMultiplication::matrixSizeQuantifier,
-                problem);
+                StrassensMatrixMultiplication::matrixSizeQuantifier);
 
-        ForkJoinPool pool = new ForkJoinPool();
-        int[][] result = pool.invoke(strassensTask);
+
+        int[][] result = strassensDaC.solveProblem(problem);
         System.out.println(Arrays.deepToString(result));
     }
 

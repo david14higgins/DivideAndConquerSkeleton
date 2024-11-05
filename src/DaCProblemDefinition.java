@@ -1,9 +1,8 @@
-import java.util.ArrayList;
-import java.util.concurrent.RecursiveTask;
+import java.util.concurrent.ForkJoinPool;
 import java.util.function.Function;
 import java.util.List;
 
-public class DaCProblemDefinition<P, S> extends RecursiveTask<S> {
+public class DaCProblemDefinition<P, S>{
 
     private final Function<P, S> problemSolver;
 
@@ -13,66 +12,21 @@ public class DaCProblemDefinition<P, S> extends RecursiveTask<S> {
 
     private final Function<P, Integer> problemQuantifier;
 
-    private final P problem;
 
     public DaCProblemDefinition(Function<P, S> problemSolver,
                                 Function<P, List<P>> subproblemGenerator,
                                 Function<List<S>, S> solutionCombiner,
-                                Function<P, Integer> problemQuantifier,
-                                P problem) {
+                                Function<P, Integer> problemQuantifier) {
         this.problemSolver = problemSolver;
         this.subproblemGenerator = subproblemGenerator;
         this.solutionCombiner = solutionCombiner;
         this.problemQuantifier = problemQuantifier;
-        this.problem = problem;
     }
 
-
-
-//    public S solveProblem(P problem) {
-//        if (problemQuantifier.apply(problem) <= granularity) {
-//            return problemSolver.apply(problem);
-//        } else {
-//            List<P> subproblems = this.subproblemGenerator.apply(problem);
-//
-//            List<S> solutions = new ArrayList<>();
-//            for (P subproblem : subproblems) {
-//                S solution = solveProblem(subproblem);
-//                solutions.add(solution);
-//            }
-//
-//            return solutionCombiner.apply(solutions);
-//        }
-//        return compute();
-//    }
-
-    @Override
-    protected S compute() {
-        // Base case: if problem is small enough, solve directly
-        int granularity = 1;
-        if (problemQuantifier.apply(problem) <= granularity) {
-            return problemSolver.apply(problem);
-        } else {
-            // Otherwise, divide the problem and solve subproblems in parallel
-            List<P> subproblems = subproblemGenerator.apply(problem);
-            List<DaCProblemDefinition<P, S>> tasks = new ArrayList<>();
-
-            // Fork a task for each subproblem
-            for (P subproblem : subproblems) {
-                DaCProblemDefinition<P, S> task = new DaCProblemDefinition<>(problemSolver, subproblemGenerator, solutionCombiner, problemQuantifier, subproblem);
-                tasks.add(task);
-                task.fork(); // Asynchronously execute the task
-            }
-
-            // Collect results by joining tasks
-            List<S> solutions = new ArrayList<>();
-            for (DaCProblemDefinition<P, S> task : tasks) {
-                solutions.add(task.join()); // Wait for task to complete and get result
-            }
-
-            // Combine results
-            return solutionCombiner.apply(solutions);
-        }
+    public S solveProblem(P problem) {
+        ForkJoinPool pool = new ForkJoinPool();
+        DaCRecursiveTask<P, S> daCRecursiveTask = new DaCRecursiveTask<>(problemSolver, subproblemGenerator, solutionCombiner, problemQuantifier, problem);
+        return pool.invoke(daCRecursiveTask);
     }
 
     /*
