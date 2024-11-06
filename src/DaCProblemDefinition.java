@@ -1,4 +1,4 @@
-import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.*;
 import java.util.function.Function;
 import java.util.List;
 
@@ -32,6 +32,7 @@ public class DaCProblemDefinition<P, S>{
     }
 
     public S solveProblem(P problem) {
+
         ForkJoinPool pool = new ForkJoinPool();
         DaCRecursiveTask<P, S> daCRecursiveTask = new DaCRecursiveTask<>(problemSolver, subproblemGenerator, solutionCombiner, problemQuantifier, problem, GRANULARITY);
         return pool.invoke(daCRecursiveTask);
@@ -62,6 +63,34 @@ public class DaCProblemDefinition<P, S>{
 
     }
 
+    public void measureProblemSolver() {
+        int TIMEOUT = 20;
+
+        for (int problemQuantity = 1; problemQuantity < 14; problemQuantity++) {
+            System.out.println("Problem Quantity: " + problemQuantity);
+            P problem = problemGenerator.apply(problemQuantity);
+
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            Future<?> future = executor.submit(() -> {
+                // Call your function with the current input size
+                problemSolver.apply(problem);
+            });
+            try {
+                // Wait for the function to complete or timeout
+                future.get(TIMEOUT, TimeUnit.SECONDS);
+            } catch (TimeoutException e) {
+                future.cancel(true); // Cancel the task if it times out
+                System.out.println("Timeout");
+            } catch (Exception e) {
+                e.printStackTrace(); // Handle other exceptions
+                break;
+            } finally {
+                executor.shutdownNow();
+            }
+        }
+
+    }
+
 
     /*
         Consider building a problem generator
@@ -74,5 +103,4 @@ public class DaCProblemDefinition<P, S>{
         Can then create a mapping of problem quantity to granularity parameters
         Should it be a mapping? Or simply one granularity value that is optimal for all problem quantities on a system
      */
-
 }

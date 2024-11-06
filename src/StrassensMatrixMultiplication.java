@@ -9,45 +9,46 @@ public class StrassensMatrixMultiplication {
 
     public void execute() {
 
-        int[][] matrixA  = {
-                {1, 2, 3, 4, 5, 6, 7, 8},
-                {9, 10, 11, 12, 13, 14, 15, 16},
-                {17, 18, 19, 20, 21, 22, 23, 24},
-                {25, 26, 27, 28, 29, 30, 31, 32},
-                {33, 34, 35, 36, 37, 38, 39, 40},
-                {41, 42, 43, 44, 45, 46, 47, 48},
-                {49, 50, 51, 52, 53, 54, 55, 56},
-                {57, 58, 59, 60, 61, 62, 63, 64}
-            };
-        int[][] matrixB  = {
-                {1, 2, 3, 4, 5, 6, 7, 8},
-                {9, 10, 11, 12, 13, 14, 15, 16},
-                {17, 18, 19, 20, 21, 22, 23, 24},
-                {25, 26, 27, 28, 29, 30, 31, 32},
-                {33, 34, 35, 36, 37, 38, 39, 40},
-                {41, 42, 43, 44, 45, 46, 47, 48},
-                {49, 50, 51, 52, 53, 54, 55, 56},
-                {57, 58, 59, 60, 61, 62, 63, 64}
-        };
-        DaCProblemDefinition<List<int[][]>, int[][]> strassensDaC = new DaCProblemDefinition<>(
-                        StrassensMatrixMultiplication::naiveMultiply,
-                        StrassensMatrixMultiplication::createSubprolems,
-                        StrassensMatrixMultiplication::joinMatrices,
-                        StrassensMatrixMultiplication::matrixSizeQuantifier,
-                        StrassensMatrixMultiplication::problemGenerator,
-                        4);
+//        int[][] matrixA  = {
+//                {1, 2, 3, 4, 5, 6, 7, 8},
+//                {9, 10, 11, 12, 13, 14, 15, 16},
+//                {17, 18, 19, 20, 21, 22, 23, 24},
+//                {25, 26, 27, 28, 29, 30, 31, 32},
+//                {33, 34, 35, 36, 37, 38, 39, 40},
+//                {41, 42, 43, 44, 45, 46, 47, 48},
+//                {49, 50, 51, 52, 53, 54, 55, 56},
+//                {57, 58, 59, 60, 61, 62, 63, 64}
+//            };
+//        int[][] matrixB  = {
+//                {1, 2, 3, 4, 5, 6, 7, 8},
+//                {9, 10, 11, 12, 13, 14, 15, 16},
+//                {17, 18, 19, 20, 21, 22, 23, 24},
+//                {25, 26, 27, 28, 29, 30, 31, 32},
+//                {33, 34, 35, 36, 37, 38, 39, 40},
+//                {41, 42, 43, 44, 45, 46, 47, 48},
+//                {49, 50, 51, 52, 53, 54, 55, 56},
+//                {57, 58, 59, 60, 61, 62, 63, 64}
+//        };
+//        DaCProblemDefinition<List<int[][]>, int[][]> strassensDaC = new DaCProblemDefinition<>(
+//                        StrassensMatrixMultiplication::naiveMultiply,
+//                        StrassensMatrixMultiplication::createSubprolems,
+//                        StrassensMatrixMultiplication::joinMatrices,
+//                        StrassensMatrixMultiplication::matrixSizeQuantifier,
+//                        StrassensMatrixMultiplication::problemGenerator,
+//                        4);
 
-        strassensDaC.modelProblemSolver();
+//        strassensDaC.modelProblemSolver();
 //        List<int[][]> problem = new ArrayList<>(Arrays.asList(matrixA, matrixB));
 //        int[][] result = strassensDaC.solveProblem(problem);
 //        System.out.println(Arrays.deepToString(result));
 
 
-//        for (int i=1; i <= 512; i = i * 2) {
+//        for (int i=1; i <= 1024; i = i * 2) {
 //            long accum = 0;
 //            for (int j = 0; j < 3; j++) {
-//                int[][] matrixA = generateRandomMatrix(512, 0, 100);
-//                int[][] matrixB = generateRandomMatrix(512, 0, 100);
+//                System.out.println("run");
+//                int[][] matrixA = generateRandomMatrix(1024, 0, 100);
+//                int[][] matrixB = generateRandomMatrix(1024, 0, 100);
 //                List<int[][]> problem = new ArrayList<>(Arrays.asList(matrixA, matrixB));
 //
 //                long startTime = System.nanoTime();
@@ -56,6 +57,7 @@ public class StrassensMatrixMultiplication {
 //                        StrassensMatrixMultiplication::createSubprolems,
 //                        StrassensMatrixMultiplication::joinMatrices,
 //                        StrassensMatrixMultiplication::matrixSizeQuantifier,
+//                        StrassensMatrixMultiplication::problemGenerator,
 //                        i);
 //                int[][] result = strassensDaC.solveProblem(problem);
 //
@@ -66,6 +68,14 @@ public class StrassensMatrixMultiplication {
 //            System.out.println("Granularity: " + i + ", Average Runtime: " + (accum / 3));
 //        }
 
+        DaCProblemDefinition<List<int[][]>, int[][]> strassensDaC = new DaCProblemDefinition<>(
+                        StrassensMatrixMultiplication::naiveMultiply,
+                        StrassensMatrixMultiplication::createSubprolems,
+                        StrassensMatrixMultiplication::joinMatrices,
+                        StrassensMatrixMultiplication::matrixSizeQuantifier,
+                        StrassensMatrixMultiplication::problemGenerator,
+                        10);
+        strassensDaC.measureProblemSolver();
 
     }
 
