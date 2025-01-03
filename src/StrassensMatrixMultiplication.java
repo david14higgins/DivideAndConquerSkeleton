@@ -68,7 +68,7 @@ public class StrassensMatrixMultiplication {
 //            System.out.println("Granularity: " + i + ", Average Runtime: " + (accum / 3));
 //        }
 
-        DaCProblemDefinition<List<int[][]>, int[][]> strassensDaC = new DaCProblemDefinition<>(
+        DaCSkeleton<List<int[][]>, int[][]> strassensDaC = new DaCSkeleton<>(
                         StrassensMatrixMultiplication::naiveMultiply,
                         StrassensMatrixMultiplication::createSubprolems,
                         StrassensMatrixMultiplication::joinMatrices,

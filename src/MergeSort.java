@@ -1,25 +1,27 @@
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.ForkJoinPool;
 
 public class MergeSort {
 
     public void execute() {
-//        int[] problem = new int[] {61, 47, 12, 91, 4, 28, 86, 39, 58, 32,
-//                88, 35, 37, 46, 93, 25, 20, 30, 16, 45,
-//                8, 36, 72, 63, 57, 52, 75, 66, 78, 81,
-//                96, 55, 2, 51, 80, 7, 34, 38, 50, 9,
-//                22, 48, 95, 10, 83, 77, 54, 29, 71, 65};
-//        DaCProblemDefinition<int[], int[]> mergesortTask = new DaCProblemDefinition<>(MergeSort::bubblesort,
-//                MergeSort::splitArray,
-//                MergeSort::joinArray,
-//                MergeSort::arraySizeQuantifier,
-//                problem);
-//
+        int[] problem = new int[] {61, 47, 12, 91, 4, 28, 86, 39, 58, 32,
+                88, 35, 37, 46, 93, 25, 20, 30, 16, 45,
+                8, 36, 72, 63, 57, 52, 75, 66, 78, 81,
+                96, 55, 2, 51, 80, 7, 34, 38, 50, 9,
+                22, 48, 95, 10, 83, 77, 54, 29, 71, 65};
+        DaCSkeleton<int[], int[]> mergesortTask = new DaCSkeleton<>(
+                MergeSort::bubblesort,
+                MergeSort::splitArray,
+                MergeSort::joinArray,
+                MergeSort::arraySizeQuantifier,
+                MergeSort::randomArrayGenerator,
+                10);
+
 //        ForkJoinPool pool = new ForkJoinPool();
 //        int[] result = pool.invoke(mergesortTask);
 //        System.out.println(Arrays.toString(result));
+        System.out.println(Arrays.toString(mergesortTask.solveProblem(problem)));
     }
 
     private static int[] bubblesort(int[] array) {
@@ -117,4 +119,11 @@ public class MergeSort {
         return array.length;
     }
 
+    private static int[] randomArrayGenerator(int size) {
+        int[] values = new int[size];
+        for (int i = 0; i < values.length; i++) {
+            values[i] = (int) (Math.random() * 101);
+        }
+        return values;
+    }
 }
