@@ -5,11 +5,11 @@ import java.util.List;
 public class MergeSort {
 
     public void execute() {
-        int[] problem = new int[] {61, 47, 12, 91, 4, 28, 86, 39, 58, 32,
-                88, 35, 37, 46, 93, 25, 20, 30, 16, 45,
-                8, 36, 72, 63, 57, 52, 75, 66, 78, 81,
-                96, 55, 2, 51, 80, 7, 34, 38, 50, 9,
-                22, 48, 95, 10, 83, 77, 54, 29, 71, 65};
+//        int[] problem = new int[] {61, 47, 12, 91, 4, 28, 86, 39, 58, 32,
+//                88, 35, 37, 46, 93, 25, 20, 30, 16, 45,
+//                8, 36, 72, 63, 57, 52, 75, 66, 78, 81,
+//                96, 55, 2, 51, 80, 7, 34, 38, 50, 9,
+//                22, 48, 95, 10, 83, 77, 54, 29, 71, 65};
         DaCSkeleton<int[], int[]> mergesortTask = new DaCSkeleton<>(
                 MergeSort::bubblesort,
                 MergeSort::splitArray,
@@ -18,10 +18,12 @@ public class MergeSort {
                 MergeSort::randomArrayGenerator,
                 10);
 
+        mergesortTask.measureProblemSolver();
+
 //        ForkJoinPool pool = new ForkJoinPool();
 //        int[] result = pool.invoke(mergesortTask);
 //        System.out.println(Arrays.toString(result));
-        System.out.println(Arrays.toString(mergesortTask.solveProblem(problem)));
+        //System.out.println(Arrays.toString(mergesortTask.solveProblem(problem)));
     }
 
     private static int[] bubblesort(int[] array) {

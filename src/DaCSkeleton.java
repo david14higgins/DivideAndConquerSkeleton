@@ -40,104 +40,79 @@ public class DaCSkeleton<P, S>{
         return pool.invoke(daCRecursiveTask);
     }
 
-    public void modelProblemSolver() {
-        int maxProblemQuantity = 10;
-
-        long[] durations = new long[10];
-
-        for (int i = 1; i <= maxProblemQuantity; i++) {
-            P generatedProblem = problemGenerator.apply(i);
-            long startTime = System.nanoTime();
-            S result = problemSolver.apply(generatedProblem);
-            long endTime = System.nanoTime();
-            long duration = endTime - startTime;
-            durations[i-1] = duration;
-        }
-
-        double durationScaleAccum = 0;
-        for (int j = 0; j < durations.length - 1; j++) {
-            double durationScale = (double) durations[j + 1] / durations[j];
-            System.out.println("Duration Scale from quantity " + (j + 1) + " to " + (j + 2) + ": " + durationScale);
-            durationScaleAccum += durationScale;
-        }
-        double averageDurationScale = durationScaleAccum / (durations.length - 1);
-        System.out.println("Average duration scale: " + averageDurationScale);
-    }
-    
     public void measureProblemSolver() {
-        int TIMEOUT = 100; // Timeout in seconds
+        int numRuntimes = 0;
+        int MAX_RUNTIMES = 1000;
+        int TIMEOUT = 30; // Timeout in seconds
         boolean timeoutTriggered = false;
         int problemQuantity = 1;
+        int ITERATIONS_PER_GRANULARITY = 3;
+        Long previousRuntime = null;
 
         // Data structure to store problem quantities and their corresponding runtimes
-        Map<Integer, Double> runtimeData = new HashMap<>();
+        Map<Integer, Long> runtimeData = new HashMap<>();
 
-        while (!timeoutTriggered) {
+        while (!timeoutTriggered && numRuntimes <= MAX_RUNTIMES) {
             P problem = problemGenerator.apply(problemQuantity);
 
-            ExecutorService executor = Executors.newSingleThreadExecutor();
-            int finalProblemQuantity = problemQuantity;
+            long accumulativeRuntime = 0;
+            for (int iterations = 0; iterations < ITERATIONS_PER_GRANULARITY; iterations++) {
+                ExecutorService executor = Executors.newSingleThreadExecutor();
+                Future<?> future = executor.submit(() -> {
+                    try {
+                        // Call your function with the current input size
+                        problemSolver.apply(problem);
+                    } catch (Exception e) {
+                        e.printStackTrace(); // Handle any exceptions from problemSolver
+                    }
+                });
 
-            // Start time measurement before submitting the task
-
-            Future<?> future = executor.submit(() -> {
                 try {
-                    // Call your function with the current input size
-                    problemSolver.apply(problem);
+                    long startTime = System.nanoTime();
+
+                    // Wait for the function to complete or timeout
+                    future.get(TIMEOUT, TimeUnit.SECONDS);
+
+                    // Measure end time after the task completes
+                    long endTime = System.nanoTime();
+                    long elapsedTime = endTime - startTime;
+
+                    accumulativeRuntime += elapsedTime;
+                } catch (TimeoutException e) {
+                    System.out.println("Timeout occurred for problem quantity: " + problemQuantity);
+                    timeoutTriggered = true;
+                    // Cancel the task and forcibly terminate the program
+                    future.cancel(true); // Attempt to cancel the running task
+                    executor.shutdownNow(); // Forcefully shutdown the executor
+                    break;
                 } catch (Exception e) {
-                    e.printStackTrace(); // Handle any exceptions from problemSolver
-                }
-            });
-
-            try {
-                long startTime = System.nanoTime();
-
-                // Wait for the function to complete or timeout
-                future.get(TIMEOUT, TimeUnit.SECONDS);
-
-                // Measure end time after the task completes
-                long endTime = System.nanoTime();
-                long elapsedTime = endTime - startTime;
-
-                // Store the runtime in milliseconds in the map
-                runtimeData.put(finalProblemQuantity, elapsedTime / 1_000_000.0);
-            } catch (TimeoutException e) {
-                System.out.println("Timeout occurred for problem quantity: " + problemQuantity);
-                timeoutTriggered = true;
-
-                // Cancel the task and forcibly terminate the program
-                future.cancel(true); // Attempt to cancel the running task
-                executor.shutdownNow(); // Forcefully shutdown the executor
-            } catch (Exception e) {
-                e.printStackTrace(); // Handle other exceptions
-                break;
-            } finally {
-                if (!executor.isShutdown()) {
-                    executor.shutdownNow(); // Ensure the executor is shut down
+                    e.printStackTrace(); // Handle other exceptions
+                    break;
+                } finally {
+                    if (!executor.isShutdown()) {
+                        executor.shutdownNow(); // Ensure the executor is shut down
+                    }
                 }
             }
+            long averageRuntime = accumulativeRuntime / ITERATIONS_PER_GRANULARITY;
+            runtimeData.put(problemQuantity, averageRuntime);
+            double multiplier = 1.0;
+            if (previousRuntime != null) {
+                multiplier = (double) averageRuntime / previousRuntime;
+            }
+            System.out.println("Problem Quantity: " + problemQuantity + ", Avg Runtime (ns): " + averageRuntime + ", Multiplier: " + multiplier + "x");
+
+
 
             problemQuantity += 1;
+            numRuntimes += 1;
+            previousRuntime = averageRuntime;
         }
 
         // Print the map of runtimes for each problem quantity
+        System.out.println();
         System.out.println("All problem runtimes:");
-        runtimeData.forEach((key, value) -> System.out.println("Problem Quantity: " + key + " Runtime (ms): " + value));
+        runtimeData.forEach((key, value) -> System.out.println("Problem Quantity: " + key + " Runtime (ns): " + value));
     }
-
-
-
-
-
-    /*
-        Consider building a problem generator
-        This is the inverse to a problem quantifier
-        It takes a problem quantity (an integer) and produces a sample problem input
-        For example 1 -> 1x1 matrix, 2 -> 2x2 matrix
-        This is another element that needs to be specified by the user
-        However, once specified, our engine can generate problem inputs and run an algorithm to determine an appropriate
-        level of granularity and parallelism
-        Can then create a mapping of problem quantity to granularity parameters
-        Should it be a mapping? Or simply one granularity value that is optimal for all problem quantities on a system
-     */
+//            ProcessBuilder processBuilder = new ProcessBuilder("java", "-cp", "your-application.jar", "YourSolverClass", problem.toString());
 }
