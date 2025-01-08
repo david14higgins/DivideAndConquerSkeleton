@@ -40,6 +40,10 @@ public class DaCSkeleton<P, S>{
         return pool.invoke(daCRecursiveTask);
     }
 
+    public void invokeMethodProbe() {
+
+    }
+
     public void measureProblemSolver() {
         int numRuntimes = 0;
         int MAX_RUNTIMES = 1000;
