@@ -122,7 +122,7 @@ public class MergeSortImpl extends DaCSkeletonAbstract<int[], int[]>{
 
     @Override
     protected Function<Integer, int[]> getProblemGenerator() {
-        return null;
+        return MergeSortImpl::randomArrayGenerator;
     }
 
     private static int[] randomArrayGenerator(int size) {
