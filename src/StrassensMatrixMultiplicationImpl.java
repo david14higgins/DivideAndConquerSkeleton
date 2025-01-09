@@ -3,82 +3,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.function.Function;
 
-
-public class StrassensMatrixMultiplication {
-
-    public void execute() {
-
-//        int[][] matrixA  = {
-//                {1, 2, 3, 4, 5, 6, 7, 8},
-//                {9, 10, 11, 12, 13, 14, 15, 16},
-//                {17, 18, 19, 20, 21, 22, 23, 24},
-//                {25, 26, 27, 28, 29, 30, 31, 32},
-//                {33, 34, 35, 36, 37, 38, 39, 40},
-//                {41, 42, 43, 44, 45, 46, 47, 48},
-//                {49, 50, 51, 52, 53, 54, 55, 56},
-//                {57, 58, 59, 60, 61, 62, 63, 64}
-//            };
-//        int[][] matrixB  = {
-//                {1, 2, 3, 4, 5, 6, 7, 8},
-//                {9, 10, 11, 12, 13, 14, 15, 16},
-//                {17, 18, 19, 20, 21, 22, 23, 24},
-//                {25, 26, 27, 28, 29, 30, 31, 32},
-//                {33, 34, 35, 36, 37, 38, 39, 40},
-//                {41, 42, 43, 44, 45, 46, 47, 48},
-//                {49, 50, 51, 52, 53, 54, 55, 56},
-//                {57, 58, 59, 60, 61, 62, 63, 64}
-//        };
-//        DaCProblemDefinition<List<int[][]>, int[][]> strassensDaC = new DaCProblemDefinition<>(
-//                        StrassensMatrixMultiplication::naiveMultiply,
-//                        StrassensMatrixMultiplication::createSubprolems,
-//                        StrassensMatrixMultiplication::joinMatrices,
-//                        StrassensMatrixMultiplication::matrixSizeQuantifier,
-//                        StrassensMatrixMultiplication::problemGenerator,
-//                        4);
-
-//        strassensDaC.modelProblemSolver();
-//        List<int[][]> problem = new ArrayList<>(Arrays.asList(matrixA, matrixB));
-//        int[][] result = strassensDaC.solveProblem(problem);
-//        System.out.println(Arrays.deepToString(result));
-
-
-//        for (int i=1; i <= 1024; i = i * 2) {
-//            long accum = 0;
-//            for (int j = 0; j < 3; j++) {
-//                System.out.println("run");
-//                int[][] matrixA = generateRandomMatrix(1024, 0, 100);
-//                int[][] matrixB = generateRandomMatrix(1024, 0, 100);
-//                List<int[][]> problem = new ArrayList<>(Arrays.asList(matrixA, matrixB));
-//
-//                long startTime = System.nanoTime();
-//                DaCProblemDefinition<List<int[][]>, int[][]> strassensDaC = new DaCProblemDefinition<>(
-//                        StrassensMatrixMultiplication::naiveMultiply,
-//                        StrassensMatrixMultiplication::createSubprolems,
-//                        StrassensMatrixMultiplication::joinMatrices,
-//                        StrassensMatrixMultiplication::matrixSizeQuantifier,
-//                        StrassensMatrixMultiplication::problemGenerator,
-//                        i);
-//                int[][] result = strassensDaC.solveProblem(problem);
-//
-//                long endTime = System.nanoTime();
-//                long duration = endTime - startTime;
-//                accum += duration;
-//            }
-//            System.out.println("Granularity: " + i + ", Average Runtime: " + (accum / 3));
-//        }
-
-        DaCSkeleton<List<int[][]>, int[][]> strassensDaC = new DaCSkeleton<>(
-                        StrassensMatrixMultiplication::naiveMultiply,
-                        StrassensMatrixMultiplication::createSubprolems,
-                        StrassensMatrixMultiplication::joinMatrices,
-                        StrassensMatrixMultiplication::matrixSizeQuantifier,
-                        StrassensMatrixMultiplication::problemGenerator,
-                        10);
-
-
-    }
-
+public class StrassensMatrixMultiplicationImpl extends DaCSkeletonAbstract<List<int[][]>, int[][]>{
     // Base case compute method
     private static int[][] naiveMultiply(List<int[][]> matrices) {
         int[][] matrixA = matrices.get(0);
@@ -101,6 +28,11 @@ public class StrassensMatrixMultiplication {
             }
         }
         return resultMatrix;
+    }
+
+    @Override
+    protected Function<List<int[][]>, int[][]> getProblemSolver() {
+        return StrassensMatrixMultiplicationImpl::naiveMultiply;
     }
 
     // Takes a pair of matrices and produces a list of pairs of matrices
@@ -157,6 +89,11 @@ public class StrassensMatrixMultiplication {
         return subproblems;
     }
 
+    @Override
+    protected Function<List<int[][]>, List<List<int[][]>>> getSubproblemGenerator() {
+        return StrassensMatrixMultiplicationImpl::createSubprolems;
+    }
+
     private static int[][] joinMatrices(List<int[][]> matrices) {
         int[][] M1 = matrices.get(0);
         int[][] M2 = matrices.get(1);
@@ -184,14 +121,33 @@ public class StrassensMatrixMultiplication {
         return resultMatrix;
     }
 
+    @Override
+    protected Function<List<int[][]>, int[][]> getSolutionCombiner() {
+        return StrassensMatrixMultiplicationImpl::joinMatrices;
+    }
+
     private static int matrixSizeQuantifier(List<int[][]> matrices) {
         return matrices.get(0).length;
+    }
+    @Override
+    protected Function<List<int[][]>, Integer> getProblemQuantifier() {
+        return StrassensMatrixMultiplicationImpl::matrixSizeQuantifier;
     }
 
     private static List<int[][]> problemGenerator(int dimensionPower) {
         int[][] matrixA = generateRandomMatrix((int) Math.pow(2, dimensionPower), 0, 1000);
         int[][] matrixB = generateRandomMatrix((int) Math.pow(2, dimensionPower), 0, 1000);
         return new ArrayList<>(Arrays.asList(matrixA, matrixB));
+    }
+
+    @Override
+    protected Function<Integer, List<int[][]>> getProblemGenerator() {
+        return StrassensMatrixMultiplicationImpl::problemGenerator;
+    }
+
+    @Override
+    protected int getGranularity() {
+        return 5;
     }
 
     // ----- Helper Methods -----

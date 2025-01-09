@@ -18,7 +18,6 @@ public class MergeSort {
                 MergeSort::randomArrayGenerator,
                 10);
 
-        mergesortTask.measureProblemSolver();
 
 //        ForkJoinPool pool = new ForkJoinPool();
 //        int[] result = pool.invoke(mergesortTask);

@@ -15,7 +15,7 @@ public class Main {
                     "-cp",
                     "out/production/DivideAndConquerAbstraction", // Set the path to compiled classes or JAR
                     "MethodProber", // Main class to invoke via reflection
-                    "MergeSortImpl" // Target class name
+                    "StrassensMatrixMultiplicationImpl" // Target class name
             );
 
             // Start the process
@@ -30,6 +30,8 @@ public class Main {
             }
 
             process.waitFor(); // Wait for the process to complete
+
+            System.out.println("Still executing in Main.java");
         } catch (Exception e) {
             e.printStackTrace();
         }
