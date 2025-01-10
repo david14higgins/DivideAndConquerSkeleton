@@ -46,22 +46,19 @@ public class MethodProber<P, S> {
 
     public void probingAlgorithm() {
         // Probing parameters
-        final int MAX_SAMPLES = 100, ITERATIONS_PER_GRANULARITY = 3, TIMEOUT = 60;
+        final int MAX_SAMPLES = 100, ITERATIONS_PER_GRANULARITY = 3, TIMEOUT = 120;
 
         // Runtime state
         boolean timeoutTriggered = false;
         int problemQuantity = 1, numSamples = 0;
-        Long previousRuntime = null;
-        Map<Integer, Long> runtimeData = new HashMap<>();
-        Map<Integer, Long> subproblemRuntimeData = new HashMap<>();
-        Map<Integer, Long> solutionCombinerRuntimeData = new HashMap<>();
+
 
         while (!timeoutTriggered && numSamples <= MAX_SAMPLES) {
             // Generate the problem
             P problem = problemGenerator.apply(problemQuantity);
 
             long solverAccumulativeRuntime = 0;
-            long subproblemAccumulativeRuntime = 0;
+            long dividerAccumulativeRuntime = 0;
             long combinerAccumulativeRuntime = 0;
 
             for (int i = 0; i < ITERATIONS_PER_GRANULARITY; i++) {
@@ -77,7 +74,7 @@ public class MethodProber<P, S> {
                     // Measure `subproblemGenerator`
                     long subproblemStart = System.nanoTime();
                     List<P> subproblems = subproblemGenerator.apply(problem);
-                    subproblemAccumulativeRuntime += System.nanoTime() - subproblemStart;
+                    dividerAccumulativeRuntime += System.nanoTime() - subproblemStart;
 
                     // Measure `solutionCombiner`
                     List<S> subproblemSolutions = subproblems.stream().map(problemSolver).toList();
@@ -101,36 +98,16 @@ public class MethodProber<P, S> {
 
             // Calculate average runtimes
             long solverAvgRuntime = solverAccumulativeRuntime / ITERATIONS_PER_GRANULARITY;
-            long subproblemAvgRuntime = subproblemAccumulativeRuntime / ITERATIONS_PER_GRANULARITY;
+            long subproblemAvgRuntime = dividerAccumulativeRuntime / ITERATIONS_PER_GRANULARITY;
             long combinerAvgRuntime = combinerAccumulativeRuntime / ITERATIONS_PER_GRANULARITY;
 
-            runtimeData.put(problemQuantity, solverAvgRuntime);
-            subproblemRuntimeData.put(problemQuantity, subproblemAvgRuntime);
-            solutionCombinerRuntimeData.put(problemQuantity, combinerAvgRuntime);
+            System.out.printf("SOLVER: %d %d%n",problemQuantity, solverAvgRuntime);
+            System.out.printf("DIVIDER: %d %d%n", problemQuantity, subproblemAvgRuntime);
+            System.out.printf("COMBINER: %d %d%n", problemQuantity, combinerAvgRuntime);
 
-            double solverMultiplier = previousRuntime == null ? 1.0 : (double) solverAvgRuntime / previousRuntime;
-
-            System.out.printf(
-                    "Problem Quantity: %d, Solver Avg Runtime (ns): %d, Multiplier: %.2fx%n",
-                    problemQuantity, solverAvgRuntime, solverMultiplier);
-            System.out.printf(
-                    "Subproblem Generator Avg Runtime (ns): %d%n", subproblemAvgRuntime);
-            System.out.printf(
-                    "Solution Combiner Avg Runtime (ns): %d%n", combinerAvgRuntime);
-
-            previousRuntime = solverAvgRuntime;
             problemQuantity++;
             numSamples++;
         }
-
-        // Print all runtimes
-        System.out.println("\nAll Runtimes:");
-        runtimeData.forEach((key, value) ->
-                System.out.printf("Problem Quantity: %d, Solver Runtime (ns): %d%n", key, value));
-        subproblemRuntimeData.forEach((key, value) ->
-                System.out.printf("Problem Quantity: %d, Subproblem Runtime (ns): %d%n", key, value));
-        solutionCombinerRuntimeData.forEach((key, value) ->
-                System.out.printf("Problem Quantity: %d, Combiner Runtime (ns): %d%n", key, value));
     }
 
 
