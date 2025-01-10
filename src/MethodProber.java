@@ -1,7 +1,6 @@
+import java.lang.reflect.Array;
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Function;
 
@@ -31,20 +30,109 @@ public class MethodProber<P, S> {
             // Create MethodProber instance
             MethodProber<?, ?> prober = new MethodProber<>();
 
-            // Run checks
+            // Retrieve problem methods
             prober.readProblemSolver(clazz, instance);
             prober.readSubproblemGenerator(clazz, instance);
             prober.readSolutionCombiner(clazz, instance);
             prober.readProblemQuantifier(clazz, instance);
             prober.readProblemGenerator(clazz, instance);
 
-            prober.measureProblemSolver();
-
+            prober.probingAlgorithm();
 
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+
+    public void probingAlgorithm() {
+        // Probing parameters
+        final int MAX_SAMPLES = 100, ITERATIONS_PER_GRANULARITY = 3, TIMEOUT = 60;
+
+        // Runtime state
+        boolean timeoutTriggered = false;
+        int problemQuantity = 1, numSamples = 0;
+        Long previousRuntime = null;
+        Map<Integer, Long> runtimeData = new HashMap<>();
+        Map<Integer, Long> subproblemRuntimeData = new HashMap<>();
+        Map<Integer, Long> solutionCombinerRuntimeData = new HashMap<>();
+
+        while (!timeoutTriggered && numSamples <= MAX_SAMPLES) {
+            // Generate the problem
+            P problem = problemGenerator.apply(problemQuantity);
+
+            long solverAccumulativeRuntime = 0;
+            long subproblemAccumulativeRuntime = 0;
+            long combinerAccumulativeRuntime = 0;
+
+            for (int i = 0; i < ITERATIONS_PER_GRANULARITY; i++) {
+                ExecutorService executor = Executors.newSingleThreadExecutor();
+
+                // Measure `problemSolver`
+                Future<S> solverFuture = executor.submit(() -> problemSolver.apply(problem));
+                try {
+                    long solverStart = System.nanoTime();
+                    S solution = solverFuture.get(TIMEOUT, TimeUnit.SECONDS);
+                    solverAccumulativeRuntime += System.nanoTime() - solverStart;
+
+                    // Measure `subproblemGenerator`
+                    long subproblemStart = System.nanoTime();
+                    List<P> subproblems = subproblemGenerator.apply(problem);
+                    subproblemAccumulativeRuntime += System.nanoTime() - subproblemStart;
+
+                    // Measure `solutionCombiner`
+                    List<S> subproblemSolutions = subproblems.stream().map(problemSolver).toList();
+                    long combinerStart = System.nanoTime();
+                    S combinedSolution = solutionCombiner.apply(subproblemSolutions);
+                    combinerAccumulativeRuntime += System.nanoTime() - combinerStart;
+
+                } catch (TimeoutException e) {
+                    System.out.println("Timeout occurred for problem quantity: " + problemQuantity);
+                    timeoutTriggered = true;
+                    solverFuture.cancel(true);
+                    executor.shutdownNow();
+                    System.exit(-1);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    break;
+                } finally {
+                    executor.shutdownNow();
+                }
+            }
+
+            // Calculate average runtimes
+            long solverAvgRuntime = solverAccumulativeRuntime / ITERATIONS_PER_GRANULARITY;
+            long subproblemAvgRuntime = subproblemAccumulativeRuntime / ITERATIONS_PER_GRANULARITY;
+            long combinerAvgRuntime = combinerAccumulativeRuntime / ITERATIONS_PER_GRANULARITY;
+
+            runtimeData.put(problemQuantity, solverAvgRuntime);
+            subproblemRuntimeData.put(problemQuantity, subproblemAvgRuntime);
+            solutionCombinerRuntimeData.put(problemQuantity, combinerAvgRuntime);
+
+            double solverMultiplier = previousRuntime == null ? 1.0 : (double) solverAvgRuntime / previousRuntime;
+
+            System.out.printf(
+                    "Problem Quantity: %d, Solver Avg Runtime (ns): %d, Multiplier: %.2fx%n",
+                    problemQuantity, solverAvgRuntime, solverMultiplier);
+            System.out.printf(
+                    "Subproblem Generator Avg Runtime (ns): %d%n", subproblemAvgRuntime);
+            System.out.printf(
+                    "Solution Combiner Avg Runtime (ns): %d%n", combinerAvgRuntime);
+
+            previousRuntime = solverAvgRuntime;
+            problemQuantity++;
+            numSamples++;
+        }
+
+        // Print all runtimes
+        System.out.println("\nAll Runtimes:");
+        runtimeData.forEach((key, value) ->
+                System.out.printf("Problem Quantity: %d, Solver Runtime (ns): %d%n", key, value));
+        subproblemRuntimeData.forEach((key, value) ->
+                System.out.printf("Problem Quantity: %d, Subproblem Runtime (ns): %d%n", key, value));
+        solutionCombinerRuntimeData.forEach((key, value) ->
+                System.out.printf("Problem Quantity: %d, Combiner Runtime (ns): %d%n", key, value));
+    }
+
 
     public void readProblemSolver(Class<?> clazz, Object instance) {
         try {
@@ -101,78 +189,5 @@ public class MethodProber<P, S> {
         }
     }
 
-    public void measureProblemSolver() {
-        int numRuntimes = 0;
-        int MAX_RUNTIMES = 100;
-        int TIMEOUT = 30; // Timeout in seconds
-        boolean timeoutTriggered = false;
-        int problemQuantity = 1;
-        int ITERATIONS_PER_GRANULARITY = 3;
-        Long previousRuntime = null;
 
-        // Data structure to store problem quantities and their corresponding runtimes
-        Map<Integer, Long> runtimeData = new HashMap<>();
-
-        while (!timeoutTriggered && numRuntimes <= MAX_RUNTIMES) {
-            P problem = problemGenerator.apply(problemQuantity);
-
-            long accumulativeRuntime = 0;
-            for (int iterations = 0; iterations < ITERATIONS_PER_GRANULARITY; iterations++) {
-                ExecutorService executor = Executors.newSingleThreadExecutor();
-                Future<?> future = executor.submit(() -> {
-                    try {
-                        // Call your function with the current input size
-                        problemSolver.apply(problem);
-                    } catch (Exception e) {
-                        e.printStackTrace(); // Handle any exceptions from problemSolver
-                    }
-                });
-
-                try {
-                    long startTime = System.nanoTime();
-
-                    // Wait for the function to complete or timeout
-                    future.get(TIMEOUT, TimeUnit.SECONDS);
-
-                    // Measure end time after the task completes
-                    long endTime = System.nanoTime();
-                    long elapsedTime = endTime - startTime;
-
-                    accumulativeRuntime += elapsedTime;
-                } catch (TimeoutException e) {
-                    System.out.println("Timeout occurred for problem quantity: " + problemQuantity);
-                    timeoutTriggered = true;
-                    // Cancel the task and forcibly terminate the program
-                    future.cancel(true); // Attempt to cancel the running task
-                    executor.shutdownNow(); // Forcefully shutdown the executor
-                    System.exit(-1);
-                } catch (Exception e) {
-                    e.printStackTrace(); // Handle other exceptions
-                    break;
-                } finally {
-                    if (!executor.isShutdown()) {
-                        executor.shutdownNow(); // Ensure the executor is shut down
-                    }
-                }
-            }
-            long averageRuntime = accumulativeRuntime / ITERATIONS_PER_GRANULARITY;
-            runtimeData.put(problemQuantity, averageRuntime);
-            double multiplier = 1.0;
-            if (previousRuntime != null) {
-                multiplier = (double) averageRuntime / previousRuntime;
-            }
-            System.out.println("Problem Quantity: " + problemQuantity + ", Avg Runtime (ns): " + averageRuntime + ", Multiplier: " + multiplier + "x");
-
-
-
-            problemQuantity += 1;
-            numRuntimes += 1;
-            previousRuntime = averageRuntime;
-        }
-
-        // Print the map of runtimes for each problem quantity
-        System.out.println();
-        System.out.println("All problem runtimes:");
-        runtimeData.forEach((key, value) -> System.out.println("Problem Quantity: " + key + " Runtime (ns): " + value));
-    }
 }

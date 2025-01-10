@@ -24,4 +24,5 @@ public abstract class DaCSkeletonAbstract<P, S> {
         );
         return pool.invoke(daCRecursiveTask);
     }
+
 }
