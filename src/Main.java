@@ -39,13 +39,11 @@ public class Main {
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    System.out.println(line);
-
                     String[] lineValues = line.split(" ");
                     switch (lineValues[0]) {
-                        case "SOLVER": solverRuntimes.put(Integer.getInteger(lineValues[1]), Long.valueOf(lineValues[2])); break;
-                        case "DIVIDER": dividerRuntimes.put(Integer.getInteger(lineValues[1]), Long.valueOf(lineValues[2])); break;
-                        case "COMBINER": combinerRuntimes.put(Integer.getInteger(lineValues[1]), Long.valueOf(lineValues[2])); break;
+                        case "SOLVER": solverRuntimes.put(Integer.parseInt(lineValues[1]), Long.valueOf(lineValues[2])); break;
+                        case "DIVIDER": dividerRuntimes.put(Integer.parseInt(lineValues[1]), Long.valueOf(lineValues[2])); break;
+                        case "COMBINER": combinerRuntimes.put(Integer.parseInt(lineValues[1]), Long.valueOf(lineValues[2])); break;
                         default: break;
                     }
                 }
@@ -61,5 +59,7 @@ public class Main {
         System.out.println(solverRuntimes);
         System.out.println(dividerRuntimes);
         System.out.println(combinerRuntimes);
+
+        //Create a model object that abstracts the underlying model and just returns an estimated runtime for a given complexity
     }
 }
