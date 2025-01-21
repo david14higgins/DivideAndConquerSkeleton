@@ -107,9 +107,9 @@ public class ModelFitter {
         }
 
         double b = (n * sumXY - sumX * sumLogY) / (n * sumX2 - sumX * sumX);
-        double a = Math.exp((sumLogY - b * sumX) / n);
+        double a = Math.exp((sumLogY - b * sumX) / n);  // Corrected calculation for a
 
-        return x -> a * Math.exp(b * x);
+        return x -> a * Math.exp(b * x);  // Exponential model function
     }
 
     // Root model
@@ -130,6 +130,38 @@ public class ModelFitter {
         double b = (sumY - a * sumX) / n;
 
         return x -> a * Math.sqrt(x) + b;
+    }
+
+    public static Model powerLawModel(Map<Integer, Long> data) {
+        List<Double> logX = new ArrayList<>();
+        List<Double> logY = new ArrayList<>();
+
+        for (Map.Entry<Integer, Long> entry : data.entrySet()) {
+            int x = entry.getKey();
+            long y = entry.getValue();
+            if (x > 0 && y > 0) {
+                logX.add(Math.log(x));
+                logY.add(Math.log(y));
+            }
+        }
+
+        int n = logX.size();
+        if (n == 0) return x -> 0;
+
+        double sumLogX = 0, sumLogY = 0, sumLogXY = 0, sumLogX2 = 0;
+        for (int i = 0; i < n; i++) {
+            double lx = logX.get(i);
+            double ly = logY.get(i);
+            sumLogX += lx;
+            sumLogY += ly;
+            sumLogXY += lx * ly;
+            sumLogX2 += lx * lx;
+        }
+
+        double b = (n * sumLogXY - sumLogX * sumLogY) / (n * sumLogX2 - sumLogX * sumLogX);
+        double a = Math.exp((sumLogY - b * sumLogX) / n);
+
+        return x -> a * Math.pow(x, b);
     }
 
     // Main fitting method that will try each model and return the one with the lowest error

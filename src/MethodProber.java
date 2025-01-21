@@ -46,7 +46,7 @@ public class MethodProber<P, S> {
 
     public void probingAlgorithm() {
         // Probing parameters
-        final int MAX_SAMPLES = 1000, ITERATIONS_PER_GRANULARITY = 3, TIMEOUT = 20;
+        final int MAX_SAMPLES = 1000, ITERATIONS_PER_GRANULARITY = 3, TIMEOUT = 60;
 
         // Runtime state
         boolean timeoutTriggered = false;
