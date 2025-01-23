@@ -1,3 +1,6 @@
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ForkJoinPool;
 import java.util.function.Function;
@@ -10,6 +13,10 @@ public abstract class DaCSkeletonAbstract<P, S> {
     protected abstract Function<P, Integer> getProblemQuantifier();
     protected abstract Function<Integer, P> getProblemGenerator();
     protected abstract int getGranularity();
+
+    private ModelFitter.BestFitModel solverBestFitModel;
+    private ModelFitter.BestFitModel dividerBestFitModel;
+    private ModelFitter.BestFitModel combinerBestFitModel;
 
     // Concrete method to solve a problem
     public S solveProblem(P problem) {
@@ -29,6 +36,70 @@ public abstract class DaCSkeletonAbstract<P, S> {
 
     }
 
+    public void probeSkeletonImplementation() {
+        HashMap<Integer, Long> solverRuntimes = new HashMap<>();
+        HashMap<Integer, Long> dividerRuntimes = new HashMap<>();
+        HashMap<Integer, Long> combinerRuntimes = new HashMap<>();
 
+        try {
+            // Build the command to start a new Java process
+            String javaHome = System.getProperty("java.home");
+            String javaExec = javaHome + "/bin/java";
+            String className = getClass().getName();
+
+            System.out.println(className);
+
+            ProcessBuilder processBuilder = new ProcessBuilder(
+                    javaExec,
+                    "-cp",
+                    "out/production/DivideAndConquerAbstraction", // Set the path to compiled classes or JAR
+                    "MethodProber", // Main class to invoke via reflection
+                    className // Target class name
+            );
+
+            // Start the process
+            Process process = processBuilder.start();
+
+            // Capture the process output
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    String[] lineValues = line.split(" ");
+                    switch (lineValues[0]) {
+                        case "SOLVER": solverRuntimes.put(Integer.parseInt(lineValues[1]), Long.valueOf(lineValues[2])); break;
+                        case "DIVIDER": dividerRuntimes.put(Integer.parseInt(lineValues[1]), Long.valueOf(lineValues[2])); break;
+                        case "COMBINER": combinerRuntimes.put(Integer.parseInt(lineValues[1]), Long.valueOf(lineValues[2])); break;
+                        default: break;
+                    }
+                }
+            }
+            process.waitFor(); // Wait for the process to complete
+
+            System.out.println("Still executing in Main.java");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        //Output read values
+        System.out.println(solverRuntimes);
+        System.out.println(dividerRuntimes);
+        System.out.println(combinerRuntimes);
+
+        ModelFitter modelFitter = new ModelFitter();
+
+        solverBestFitModel = modelFitter.fitModel(solverRuntimes);
+        dividerBestFitModel = modelFitter.fitModel(dividerRuntimes);
+        combinerBestFitModel = modelFitter.fitModel(combinerRuntimes);
+    }
+
+    public S DaCSolve(P problem) {
+        if(solverBestFitModel!= null && dividerBestFitModel != null && combinerBestFitModel != null) {
+            System.out.println("Valid call");
+            return null;
+        } else {
+            System.out.println("Need to probe skeleton implementation before granularity can be automatically selected");
+            return null;
+        }
+    }
 
 }
