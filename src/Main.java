@@ -10,7 +10,13 @@ public class Main {
     public static void main(String[] args) {
         MergeSortImpl mergeSortImpl = new MergeSortImpl();
         mergeSortImpl.probeSkeletonImplementation();
-        int[] result = mergeSortImpl.DaCSolve(new int[] {1, 5, 8, 10, 12, 15, 3, 4});
+        int arraySize = 10000;
+        int[] inputArray = randomArrayGenerator(arraySize);
+
+
+        int[] result = mergeSortImpl.DaCSolve(inputArray);
+
+        System.out.println(Arrays.toString(result));
 
 
         //StrassensMatrixMultiplicationImpl strassensMatrixMultiplication = new StrassensMatrixMultiplicationImpl();
@@ -18,5 +24,11 @@ public class Main {
         //Do stuff with skeleton
     }
 
-
+    private static int[] randomArrayGenerator(int size) {
+        int[] values = new int[size];
+        for (int i = 0; i < values.length; i++) {
+            values[i] = (int) (Math.random() * 101);
+        }
+        return values;
+    }
 }

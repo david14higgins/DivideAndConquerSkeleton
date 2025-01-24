@@ -1,5 +1,6 @@
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ForkJoinPool;
@@ -17,24 +18,6 @@ public abstract class DaCSkeletonAbstract<P, S> {
     private ModelFitter.BestFitModel solverBestFitModel;
     private ModelFitter.BestFitModel dividerBestFitModel;
     private ModelFitter.BestFitModel combinerBestFitModel;
-
-    // Concrete method to solve a problem
-    public S solveProblem(P problem) {
-        ForkJoinPool pool = new ForkJoinPool();
-        DaCRecursiveTask<P, S> daCRecursiveTask = new DaCRecursiveTask<>(
-                getProblemSolver(),
-                getSubproblemGenerator(),
-                getSolutionCombiner(),
-                getProblemQuantifier(),
-                problem,
-                getGranularity()
-        );
-        return pool.invoke(daCRecursiveTask);
-    }
-
-    private void calculateGranularityNaive(P problem) {
-
-    }
 
     public void probeSkeletonImplementation() {
         HashMap<Integer, Long> solverRuntimes = new HashMap<>();
@@ -92,12 +75,48 @@ public abstract class DaCSkeletonAbstract<P, S> {
         combinerBestFitModel = modelFitter.fitModel(combinerRuntimes);
     }
 
+    private int calculateGranularityNaive(P problem) {
+        double lowestRuntime = Double.MAX_VALUE;
+        int problemSize = getProblemQuantifier().apply(problem);
+        int bestGranularity = problemSize;
+        for (int granularity = 1; granularity <= problemSize; granularity+=100) {
+            double estimatedRuntime = estimateRuntimeWithGranularity(problem, granularity);
+            if (estimatedRuntime < lowestRuntime) {
+                lowestRuntime = estimatedRuntime;
+                bestGranularity = granularity;
+            }
+        }
+        System.out.println("Granularity Selected: " + bestGranularity);
+        return bestGranularity;
+    }
+
+    private double estimateRuntimeWithGranularity(P problem, int granularity) {
+        int problemSize = getProblemQuantifier().apply(problem);
+        if (problemSize < granularity) {
+            return solverBestFitModel.model.predict(problemSize);
+        } else {
+            ArrayList<P> subproblems = (ArrayList<P>) getSubproblemGenerator().apply(problem);
+            int numSubproblems = subproblems.size();
+            return dividerBestFitModel.model.predict(problemSize) + combinerBestFitModel.model.predict(problemSize) +
+                    numSubproblems * estimateRuntimeWithGranularity(subproblems.get(0), granularity);
+        }
+    }
+
     public S DaCSolve(P problem) {
         if(solverBestFitModel!= null && dividerBestFitModel != null && combinerBestFitModel != null) {
-            System.out.println("Valid call");
-            return null;
+            int granularity = calculateGranularityNaive(problem);
+            ForkJoinPool pool = new ForkJoinPool();
+            DaCRecursiveTask<P, S> daCRecursiveTask = new DaCRecursiveTask<>(
+                    getProblemSolver(),
+                    getSubproblemGenerator(),
+                    getSolutionCombiner(),
+                    getProblemQuantifier(),
+                    problem,
+                    granularity
+            );
+            return pool.invoke(daCRecursiveTask);
         } else {
-            System.out.println("Need to probe skeleton implementation before granularity can be automatically selected");
+            System.out.println("Skeleton implementation must be probed before DaC applied");
             return null;
         }
     }
