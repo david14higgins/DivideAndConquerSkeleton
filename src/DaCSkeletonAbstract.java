@@ -79,7 +79,7 @@ public abstract class DaCSkeletonAbstract<P, S> {
         double lowestRuntime = Double.MAX_VALUE;
         int problemSize = getProblemQuantifier().apply(problem);
         int bestGranularity = problemSize;
-        for (int granularity = 1; granularity <= problemSize; granularity+=100) {
+        for (int granularity = 1; granularity <= problemSize; granularity++) {
             double estimatedRuntime = estimateRuntimeWithGranularity(problem, granularity);
             if (estimatedRuntime < lowestRuntime) {
                 lowestRuntime = estimatedRuntime;
