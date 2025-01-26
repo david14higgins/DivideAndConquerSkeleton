@@ -46,7 +46,7 @@ public class MethodProber<P, S> {
 
     public void probingAlgorithm() {
         // Probing parameters
-        final int MAX_SAMPLES = 1000, ITERATIONS_PER_GRANULARITY = 3, TIMEOUT = 60;
+        final int MAX_SAMPLES = 1000, ITERATIONS_PER_QUANTITY = 3, TIMEOUT = 60;
 
         // Runtime state
         boolean timeoutTriggered = false;
@@ -61,7 +61,7 @@ public class MethodProber<P, S> {
             long dividerAccumulativeRuntime = 0;
             long combinerAccumulativeRuntime = 0;
 
-            for (int i = 0; i < ITERATIONS_PER_GRANULARITY; i++) {
+            for (int i = 0; i < ITERATIONS_PER_QUANTITY; i++) {
                 ExecutorService executor = Executors.newSingleThreadExecutor();
 
                 // Measure `problemSolver`
@@ -97,9 +97,9 @@ public class MethodProber<P, S> {
             }
 
             // Calculate average runtimes
-            long solverAvgRuntime = solverAccumulativeRuntime / ITERATIONS_PER_GRANULARITY;
-            long subproblemAvgRuntime = dividerAccumulativeRuntime / ITERATIONS_PER_GRANULARITY;
-            long combinerAvgRuntime = combinerAccumulativeRuntime / ITERATIONS_PER_GRANULARITY;
+            long solverAvgRuntime = solverAccumulativeRuntime / ITERATIONS_PER_QUANTITY;
+            long subproblemAvgRuntime = dividerAccumulativeRuntime / ITERATIONS_PER_QUANTITY;
+            long combinerAvgRuntime = combinerAccumulativeRuntime / ITERATIONS_PER_QUANTITY;
 
             System.out.printf("SOLVER %d %d%n",problemQuantity, solverAvgRuntime);
             System.out.printf("DIVIDER %d %d%n", problemQuantity, subproblemAvgRuntime);
