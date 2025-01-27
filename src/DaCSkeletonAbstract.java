@@ -68,11 +68,18 @@ public abstract class DaCSkeletonAbstract<P, S> {
         System.out.println(dividerRuntimes);
         System.out.println(combinerRuntimes);
 
-        ModelFitter modelFitter = new ModelFitter();
+        // Create an instance of ModelFitter with the given data
+        ModelFitter modelFitterSolver = new ModelFitter(solverRuntimes);
+        ModelFitter modelFitterDivider = new ModelFitter(dividerRuntimes);
+        ModelFitter modelFitterCombiner = new ModelFitter(combinerRuntimes);
 
-        solverBestFitModel = modelFitter.fitModel(solverRuntimes);
-        dividerBestFitModel = modelFitter.fitModel(dividerRuntimes);
-        combinerBestFitModel = modelFitter.fitModel(combinerRuntimes);
+        // Fit the models for each runtime dataset
+        solverBestFitModel = modelFitterSolver.fitModel();
+        dividerBestFitModel = modelFitterDivider.fitModel();
+        combinerBestFitModel = modelFitterCombiner.fitModel();
+
+        System.out.println("Solver test 5: " + solverBestFitModel.model.predict(5));
+        System.out.println("Solver test 15: " + solverBestFitModel.model.predict(15));
     }
 
     private int calculateGranularityNaive(P problem) {
@@ -112,7 +119,6 @@ public abstract class DaCSkeletonAbstract<P, S> {
         double estimatedRuntime = 0;
 
         while(!terminate) {
-            System.out.println("Current Problem Size: " + currentProblemSize);
             if (currentProblemSize <= granularity) { // Base solutions
                 double solverSequentialRuntime = solverBestFitModel.model.predict(currentProblemSize);
                 estimatedRuntime += solverSequentialRuntime * activeSubproblems / Math.min(activeSubproblems, parallelism);
@@ -130,7 +136,6 @@ public abstract class DaCSkeletonAbstract<P, S> {
                 currentProblemSize = getProblemQuantifier().apply(currentProblem);
             }
         }
-        System.out.println("Estimated Runtime: " + estimatedRuntime);
         return estimatedRuntime;
     }
     /* ------ ASSUMPTIONS -------

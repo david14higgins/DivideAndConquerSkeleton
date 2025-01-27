@@ -6,53 +6,74 @@ public class ModelFitter {
         double predict(int x);
     }
 
+    public static class CachedModel implements Model {
+        private final Model baseModel;
+        private final Map<Integer, Long> cache;
+
+        public CachedModel(Model baseModel, Map<Integer, Long> cache) {
+            this.baseModel = baseModel;
+            this.cache = cache;
+        }
+
+        @Override
+        public double predict(int x) {
+            if (cache.containsKey(x)) {
+                return cache.get(x); // Use cached value if available
+            } else {
+                return baseModel.predict(x); // Otherwise, predict using the model
+            }
+        }
+    }
+
     public static class BestFitModel {
         public Model model;
         public double error;
-        public String modelName;  // Add model name
+        public String modelName;
 
         public BestFitModel(Model model, double error, String modelName) {
             this.model = model;
             this.error = error;
-            this.modelName = modelName;  // Store the model name
+            this.modelName = modelName;
         }
     }
 
-    // Helper function to compute the error (sum of squared differences between actual and predicted values)
-    private static double calculateError(Map<Integer, Long> data, Model model) {
+    private final Map<Integer, Long> data;
+
+    public ModelFitter(Map<Integer, Long> data) {
+        this.data = data;
+    }
+
+    private double calculateError(Model model) {
         double error = 0;
         for (Map.Entry<Integer, Long> entry : data.entrySet()) {
             int x = entry.getKey();
             long y = entry.getValue();
             double predicted = model.predict(x);
-            error += Math.pow(predicted - y, 2);  // Sum of squared errors
+            error += Math.pow(predicted - y, 2);
         }
         return error;
     }
 
-    // Constant model
     public static Model constantModel(Map<Integer, Long> data) {
         double constant = data.values().stream().mapToLong(Long::longValue).average().orElse(0.0);
         return x -> constant;
     }
 
-    // Logarithmic model using least squares regression
     public static Model logarithmicModel(Map<Integer, Long> data) {
-        // Use log(x) vs y fitting method
         List<Double> xLog = new ArrayList<>();
         List<Double> y = new ArrayList<>();
 
         for (Map.Entry<Integer, Long> entry : data.entrySet()) {
             int x = entry.getKey();
             long yVal = entry.getValue();
-            if (x > 0 && yVal > 0) { // Avoid log(0) and negative y values
+            if (x > 0 && yVal > 0) {
                 xLog.add(Math.log(x));
                 y.add((double) yVal);
             }
         }
 
         int n = xLog.size();
-        if (n == 0) return x -> 0; // Avoid empty data sets
+        if (n == 0) return x -> 0;
 
         double sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
         for (int i = 0; i < n; i++) {
@@ -64,16 +85,13 @@ public class ModelFitter {
             sumX2 += x * x;
         }
 
-        // Solving for a and b using least squares method
         double b = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
         double a = (sumY - b * sumX) / n;
 
         return x -> a * Math.log(x) + b;
     }
 
-    // Linear model
     public static Model linearModel(Map<Integer, Long> data) {
-        // Use linear regression to find the best fit y = mx + b
         double sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
         int n = data.size();
 
@@ -92,7 +110,6 @@ public class ModelFitter {
         return x -> m * x + b;
     }
 
-    // Exponential model
     public static Model exponentialModel(Map<Integer, Long> data) {
         double sumX = 0, sumLogY = 0, sumXY = 0, sumX2 = 0;
         int n = data.size();
@@ -107,12 +124,11 @@ public class ModelFitter {
         }
 
         double b = (n * sumXY - sumX * sumLogY) / (n * sumX2 - sumX * sumX);
-        double a = Math.exp((sumLogY - b * sumX) / n);  // Corrected calculation for a
+        double a = Math.exp((sumLogY - b * sumX) / n);
 
-        return x -> a * Math.exp(b * x);  // Exponential model function
+        return x -> a * Math.exp(b * x);
     }
 
-    // Root model
     public static Model rootModel(Map<Integer, Long> data) {
         double sumX = 0, sumY = 0, sumX2 = 0, sumXY = 0;
         int n = data.size();
@@ -132,40 +148,7 @@ public class ModelFitter {
         return x -> a * Math.sqrt(x) + b;
     }
 
-    public static Model powerLawModel(Map<Integer, Long> data) {
-        List<Double> logX = new ArrayList<>();
-        List<Double> logY = new ArrayList<>();
-
-        for (Map.Entry<Integer, Long> entry : data.entrySet()) {
-            int x = entry.getKey();
-            long y = entry.getValue();
-            if (x > 0 && y > 0) {
-                logX.add(Math.log(x));
-                logY.add(Math.log(y));
-            }
-        }
-
-        int n = logX.size();
-        if (n == 0) return x -> 0;
-
-        double sumLogX = 0, sumLogY = 0, sumLogXY = 0, sumLogX2 = 0;
-        for (int i = 0; i < n; i++) {
-            double lx = logX.get(i);
-            double ly = logY.get(i);
-            sumLogX += lx;
-            sumLogY += ly;
-            sumLogXY += lx * ly;
-            sumLogX2 += lx * lx;
-        }
-
-        double b = (n * sumLogXY - sumLogX * sumLogY) / (n * sumLogX2 - sumLogX * sumLogX);
-        double a = Math.exp((sumLogY - b * sumLogX) / n);
-
-        return x -> a * Math.pow(x, b);
-    }
-
-    // Main fitting method that will try each model and return the one with the lowest error
-    public BestFitModel fitModel(Map<Integer, Long> data) {
+    public BestFitModel fitModel() {
         List<Map.Entry<String, Model>> models = List.of(
                 new AbstractMap.SimpleEntry<>("Constant", constantModel(data)),
                 new AbstractMap.SimpleEntry<>("Logarithmic", logarithmicModel(data)),
@@ -179,10 +162,10 @@ public class ModelFitter {
 
         for (Map.Entry<String, Model> entry : models) {
             Model model = entry.getValue();
-            double error = calculateError(data, model);
+            double error = calculateError(model);
             if (error < minError) {
                 minError = error;
-                bestFit = new BestFitModel(model, minError, entry.getKey());  // Store model name
+                bestFit = new BestFitModel(new CachedModel(model, data), minError, entry.getKey());
             }
         }
 
