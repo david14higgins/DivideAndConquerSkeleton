@@ -90,22 +90,64 @@ public abstract class DaCSkeletonAbstract<P, S> {
         return bestGranularity;
     }
 
+//    private double estimateRuntimeWithGranularity(P problem, int granularity) {
+//        int problemSize = getProblemQuantifier().apply(problem);
+//        if (problemSize < granularity) {
+//            return solverBestFitModel.model.predict(problemSize);
+//        } else {
+//            ArrayList<P> subproblems = (ArrayList<P>) getSubproblemGenerator().apply(problem);
+//            int numSubproblems = subproblems.size();
+//            return dividerBestFitModel.model.predict(problemSize) + combinerBestFitModel.model.predict(problemSize) +
+//                    numSubproblems * estimateRuntimeWithGranularity(subproblems.get(0), granularity);
+//        }
+//    }
+
+    //Opting to not use recursion because we want a global state of the problem execution
     private double estimateRuntimeWithGranularity(P problem, int granularity) {
-        int problemSize = getProblemQuantifier().apply(problem);
-        if (problemSize < granularity) {
-            return solverBestFitModel.model.predict(problemSize);
-        } else {
-            ArrayList<P> subproblems = (ArrayList<P>) getSubproblemGenerator().apply(problem);
-            int numSubproblems = subproblems.size();
-            return dividerBestFitModel.model.predict(problemSize) + combinerBestFitModel.model.predict(problemSize) +
-                    numSubproblems * estimateRuntimeWithGranularity(subproblems.get(0), granularity);
+        P currentProblem = problem;
+        int currentProblemSize = getProblemQuantifier().apply(problem);
+        int activeSubproblems = 1;
+        int parallelism = 8; //Hardcoded for now
+        boolean terminate = false;
+        double estimatedRuntime = 0;
+
+        while(!terminate) {
+            System.out.println("Current Problem Size: " + currentProblemSize);
+            if (currentProblemSize <= granularity) { // Base solutions
+                double solverSequentialRuntime = solverBestFitModel.model.predict(currentProblemSize);
+                estimatedRuntime += solverSequentialRuntime * activeSubproblems / Math.min(activeSubproblems, parallelism);
+                terminate = true;
+            } else { // Divide and Combine costs
+                double dividerSequentialRuntime = dividerBestFitModel.model.predict(currentProblemSize);
+                double combinerSequentialRuntime = combinerBestFitModel.model.predict(currentProblemSize);
+
+                estimatedRuntime += dividerSequentialRuntime * activeSubproblems / Math.min(activeSubproblems, parallelism);
+                estimatedRuntime += combinerSequentialRuntime * activeSubproblems / Math.min(activeSubproblems, parallelism);
+
+                ArrayList<P> subproblems = (ArrayList<P>) getSubproblemGenerator().apply(currentProblem);
+                activeSubproblems *= subproblems.size();
+                currentProblem = subproblems.get(0);
+                currentProblemSize = getProblemQuantifier().apply(currentProblem);
+            }
         }
+        System.out.println("Estimated Runtime: " + estimatedRuntime);
+        return estimatedRuntime;
     }
+    /* ------ ASSUMPTIONS -------
+     - Divider splits up problems into evenly sized subproblems
+     - All threads in the ForkJoinPool are used
+     - We need to make assumptions on how work is split between threads
+     - We make a consistent number of subproblems on division (not necessarily true)
+     - Subproblems are of equal size
+     - We do not consider input complexity
+     */
 
     public S DaCSolve(P problem) {
         if(solverBestFitModel!= null && dividerBestFitModel != null && combinerBestFitModel != null) {
             int granularity = calculateGranularityNaive(problem);
             ForkJoinPool pool = new ForkJoinPool();
+            System.out.println("Pool Size: " + pool.getPoolSize());
+            System.out.println("Parallelism: " + pool.getParallelism());
             DaCRecursiveTask<P, S> daCRecursiveTask = new DaCRecursiveTask<>(
                     getProblemSolver(),
                     getSubproblemGenerator(),
