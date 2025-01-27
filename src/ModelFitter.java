@@ -1,9 +1,7 @@
 import java.util.*;
-import java.util.function.Function;
-
 public class ModelFitter {
     public interface Model {
-        double predict(int x);
+        long predict(int x);
     }
 
     public static class CachedModel implements Model {
@@ -16,7 +14,7 @@ public class ModelFitter {
         }
 
         @Override
-        public double predict(int x) {
+        public long predict(int x) {
             if (cache.containsKey(x)) {
                 return cache.get(x); // Use cached value if available
             } else {
@@ -27,10 +25,10 @@ public class ModelFitter {
 
     public static class BestFitModel {
         public Model model;
-        public double error;
+        public long error;
         public String modelName;
 
-        public BestFitModel(Model model, double error, String modelName) {
+        public BestFitModel(Model model, long error, String modelName) {
             this.model = model;
             this.error = error;
             this.modelName = modelName;
@@ -43,32 +41,32 @@ public class ModelFitter {
         this.data = data;
     }
 
-    private double calculateError(Model model) {
-        double error = 0;
+    private long calculateError(Model model) {
+        long error = 0;
         for (Map.Entry<Integer, Long> entry : data.entrySet()) {
             int x = entry.getKey();
             long y = entry.getValue();
-            double predicted = model.predict(x);
-            error += Math.pow(predicted - y, 2);
+            long predicted = model.predict(x);
+            error += (predicted - y) * (predicted - y);
         }
         return error;
     }
 
     public static Model constantModel(Map<Integer, Long> data) {
-        double constant = data.values().stream().mapToLong(Long::longValue).average().orElse(0.0);
+        long constant = (long) data.values().stream().mapToLong(Long::longValue).average().orElse(0);
         return x -> constant;
     }
 
     public static Model logarithmicModel(Map<Integer, Long> data) {
         List<Double> xLog = new ArrayList<>();
-        List<Double> y = new ArrayList<>();
+        List<Long> y = new ArrayList<>();
 
         for (Map.Entry<Integer, Long> entry : data.entrySet()) {
             int x = entry.getKey();
             long yVal = entry.getValue();
             if (x > 0 && yVal > 0) {
                 xLog.add(Math.log(x));
-                y.add((double) yVal);
+                y.add(yVal);
             }
         }
 
@@ -78,7 +76,7 @@ public class ModelFitter {
         double sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
         for (int i = 0; i < n; i++) {
             double x = xLog.get(i);
-            double yVal = y.get(i);
+            long yVal = y.get(i);
             sumX += x;
             sumY += yVal;
             sumXY += x * yVal;
@@ -88,11 +86,11 @@ public class ModelFitter {
         double b = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
         double a = (sumY - b * sumX) / n;
 
-        return x -> a * Math.log(x) + b;
+        return x -> (long) (a * Math.log(x) + b);
     }
 
     public static Model linearModel(Map<Integer, Long> data) {
-        double sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+        long sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
         int n = data.size();
 
         for (Map.Entry<Integer, Long> entry : data.entrySet()) {
@@ -104,14 +102,14 @@ public class ModelFitter {
             sumX2 += x * x;
         }
 
-        double m = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
-        double b = (sumY - m * sumX) / n;
+        double m = (n * sumXY - sumX * sumY) / (double) (n * sumX2 - sumX * sumX);
+        double b = (sumY - m * sumX) / (double) n;
 
-        return x -> m * x + b;
+        return x -> (long) (m * x + b);
     }
 
     public static Model exponentialModel(Map<Integer, Long> data) {
-        double sumX = 0, sumLogY = 0, sumXY = 0, sumX2 = 0;
+        long sumX = 0, sumLogY = 0, sumXY = 0, sumX2 = 0;
         int n = data.size();
 
         for (Map.Entry<Integer, Long> entry : data.entrySet()) {
@@ -126,11 +124,11 @@ public class ModelFitter {
         double b = (n * sumXY - sumX * sumLogY) / (n * sumX2 - sumX * sumX);
         double a = Math.exp((sumLogY - b * sumX) / n);
 
-        return x -> a * Math.exp(b * x);
+        return x -> (long) (a * Math.exp(b * x));
     }
 
     public static Model rootModel(Map<Integer, Long> data) {
-        double sumX = 0, sumY = 0, sumX2 = 0, sumXY = 0;
+        long sumX = 0, sumY = 0, sumX2 = 0, sumXY = 0;
         int n = data.size();
 
         for (Map.Entry<Integer, Long> entry : data.entrySet()) {
@@ -142,10 +140,10 @@ public class ModelFitter {
             sumXY += x * y;
         }
 
-        double a = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
-        double b = (sumY - a * sumX) / n;
+        double a = (n * sumXY - sumX * sumY) / (double) (n * sumX2 - sumX * sumX);
+        double b = (sumY - a * sumX) / (double) n;
 
-        return x -> a * Math.sqrt(x) + b;
+        return x -> (long) (a * Math.sqrt(x) + b);
     }
 
     public BestFitModel fitModel() {
@@ -158,11 +156,11 @@ public class ModelFitter {
         );
 
         BestFitModel bestFit = null;
-        double minError = Double.MAX_VALUE;
+        long minError = Long.MAX_VALUE;
 
         for (Map.Entry<String, Model> entry : models) {
             Model model = entry.getValue();
-            double error = calculateError(model);
+            long error = calculateError(model);
             if (error < minError) {
                 minError = error;
                 bestFit = new BestFitModel(new CachedModel(model, data), minError, entry.getKey());

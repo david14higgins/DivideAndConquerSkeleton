@@ -136,6 +136,7 @@ public abstract class DaCSkeletonAbstract<P, S> {
                 currentProblemSize = getProblemQuantifier().apply(currentProblem);
             }
         }
+        System.out.println("Granularity: " + granularity + ", Estimated Runtime: " + estimatedRuntime);
         return estimatedRuntime;
     }
     /* ------ ASSUMPTIONS -------
