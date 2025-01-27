@@ -105,7 +105,7 @@ public abstract class DaCSkeletonAbstract<P, S> {
     //Opting to not use recursion because we want a global state of the problem execution
     private double estimateRuntimeWithGranularity(P problem, int granularity) {
         P currentProblem = problem;
-        int currentProblemSize = getProblemQuantifier().apply(problem);
+        int currentProblemSize = getProblemQuantifier().apply(currentProblem);
         int activeSubproblems = 1;
         int parallelism = 8; //Hardcoded for now
         boolean terminate = false;

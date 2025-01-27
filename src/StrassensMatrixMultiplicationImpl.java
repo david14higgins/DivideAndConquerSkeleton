@@ -127,7 +127,8 @@ public class StrassensMatrixMultiplicationImpl extends DaCSkeletonAbstract<List<
     }
 
     private static int matrixSizeQuantifier(List<int[][]> matrices) {
-        return matrices.get(0).length;
+        int sideLength = matrices.get(0).length;
+        return (int) (Math.log(sideLength) / Math.log(2));
     }
     @Override
     protected Function<List<int[][]>, Integer> getProblemQuantifier() {
