@@ -77,9 +77,7 @@ public abstract class DaCSkeletonAbstract<P, S> {
         solverBestFitModel = modelFitterSolver.fitModel();
         dividerBestFitModel = modelFitterDivider.fitModel();
         combinerBestFitModel = modelFitterCombiner.fitModel();
-
-        System.out.println("Solver test 5: " + solverBestFitModel.model.predict(5));
-        System.out.println("Solver test 15: " + solverBestFitModel.model.predict(15));
+        
     }
 
     private int calculateGranularityNaive(P problem) {
@@ -152,8 +150,6 @@ public abstract class DaCSkeletonAbstract<P, S> {
         if(solverBestFitModel!= null && dividerBestFitModel != null && combinerBestFitModel != null) {
             int granularity = calculateGranularityNaive(problem);
             ForkJoinPool pool = new ForkJoinPool();
-            System.out.println("Pool Size: " + pool.getPoolSize());
-            System.out.println("Parallelism: " + pool.getParallelism());
             DaCRecursiveTask<P, S> daCRecursiveTask = new DaCRecursiveTask<>(
                     getProblemSolver(),
                     getSubproblemGenerator(),
@@ -162,7 +158,33 @@ public abstract class DaCSkeletonAbstract<P, S> {
                     problem,
                     granularity
             );
-            return pool.invoke(daCRecursiveTask);
+            long startTime = System.nanoTime();
+            S result = pool.invoke(daCRecursiveTask);
+            long executionTime = System.nanoTime() - startTime;
+            System.out.println("Actual Execution Time: " + executionTime);
+            return result;
+        } else {
+            System.out.println("Skeleton implementation must be probed before DaC applied");
+            return null;
+        }
+    }
+
+    public S DaCSolveWithGranularity(P problem, int granularity) {
+        if(solverBestFitModel!= null && dividerBestFitModel != null && combinerBestFitModel != null) {
+            ForkJoinPool pool = new ForkJoinPool();
+            DaCRecursiveTask<P, S> daCRecursiveTask = new DaCRecursiveTask<>(
+                    getProblemSolver(),
+                    getSubproblemGenerator(),
+                    getSolutionCombiner(),
+                    getProblemQuantifier(),
+                    problem,
+                    granularity
+            );
+            long startTime = System.nanoTime();
+            S result = pool.invoke(daCRecursiveTask);
+            long executionTime = System.nanoTime() - startTime;
+            System.out.println("Granularity: " + granularity + ", Actual Execution Time: " + executionTime);
+            return result;
         } else {
             System.out.println("Skeleton implementation must be probed before DaC applied");
             return null;

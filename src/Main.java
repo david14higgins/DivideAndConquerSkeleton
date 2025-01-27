@@ -20,12 +20,13 @@ public class Main {
         StrassensMatrixMultiplicationImpl strassensMatrixMultiplication = new StrassensMatrixMultiplicationImpl();
         strassensMatrixMultiplication.probeSkeletonImplementation();
 
-        int[][] matrixA = createMatrix(512);
-        int[][] matrixB = createMatrix(512);
+        int[][] matrixA = createMatrix(1024);
+        int[][] matrixB = createMatrix(1024);
         ArrayList<int[][]> matrices = new ArrayList<>(Arrays.asList(matrixA, matrixB));
 
-        int[][] result = strassensMatrixMultiplication.DaCSolve(matrices);
-
+        for (int i = 3; i < 10; i++) {
+            int[][] result = strassensMatrixMultiplication.DaCSolveWithGranularity(matrices, i);
+        }
         //Do stuff with skeleton
     }
 
