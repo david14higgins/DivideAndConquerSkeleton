@@ -24,17 +24,27 @@ public class ImplementationRuntimeLogger {
         }
     }
 
-    public void saveData(DaCSkeletonAbstract<?, ?> skeleton, ModelFitter.BestFitModel model, Map<Integer, Long> runtimeData) {
-        String fileName = hashFile(Path.of(skeleton.getClass().getName())) + ".dat";
-        System.out.println("Saving to file: " + fileName);
+    public static void saveData(DaCSkeletonAbstract<?, ?> skeleton) {
+        // Define the directory path and file name
+        Path dirPath = Path.of("ImplementationLogs");
+        Path filePath = dirPath.resolve(hashFile(Path.of("src/" + skeleton.getClass().getName() + ".java")) + ".dat");
 
-        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(fileName))) {
+        // Create the directory if it doesn't exist
+        try {
+            Files.createDirectories(dirPath); // This ensures the directory exists
+        } catch (IOException e) {
+            e.printStackTrace();
+            return; // Exit if directory creation fails
+        }
+
+        // Write to the file in the "ImplementationLogs" directory
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filePath.toFile()))) {
             oos.writeObject(skeleton.solverBestFitModel.modelName); // Save the solver model
-            oos.writeObject(skeleton.solverBestFitModel.cachedModel); // Save the divider model
+            oos.writeObject(skeleton.solverBestFitModel.cachedModel.cache); // Save the divider model
             oos.writeObject(skeleton.dividerBestFitModel.modelName); // Save the combiner model
-            oos.writeObject(skeleton.dividerBestFitModel.cachedModel); // Save the solver runtimes
+            oos.writeObject(skeleton.dividerBestFitModel.cachedModel.cache); // Save the solver runtimes
             oos.writeObject(skeleton.combinerBestFitModel.modelName); // Save the divider runtimes
-            oos.writeObject(skeleton.combinerBestFitModel.cachedModel); // Save the combiner runtimes
+            oos.writeObject(skeleton.combinerBestFitModel.cachedModel.cache); // Save the combiner runtimes
         } catch (IOException e) {
             e.printStackTrace();
         }

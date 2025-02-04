@@ -17,12 +17,10 @@ public class Main {
 //        int[] result = mergeSortImpl.DaCSolve(inputArray);
 //        System.out.println(Arrays.toString(result));
 
-
-//        StrassensMatrixMultiplicationImpl strassensMatrixMultiplication = new StrassensMatrixMultiplicationImpl();
-//        strassensMatrixMultiplication.probeSkeletonImplementation();
-//        long predict5 = strassensMatrixMultiplication.dividerBestFitModel.cachedModel.predict(5);
-//        System.out.println("Predicted divide runtime for granularity 5: " + predict5);
-
+        StrassensMatrixMultiplicationImpl strassensMatrixMultiplication = new StrassensMatrixMultiplicationImpl();
+        strassensMatrixMultiplication.probeSkeletonImplementation();
+        System.out.println("Logging implementation");
+        ImplementationRuntimeLogger.saveData(strassensMatrixMultiplication);
 //        int[][] matrixA = createMatrix(1024);
 //        int[][] matrixB = createMatrix(1024);
 //        ArrayList<int[][]> matrices = new ArrayList<>(Arrays.asList(matrixA, matrixB));
