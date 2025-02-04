@@ -22,12 +22,12 @@ public abstract class DaCSkeletonAbstract<P, S> {
         String className = getClass().getName();
         String logFileName = ImplementationRuntimeLogger.implementationLogged(className);
         if (logFileName != null) {
-            System.out.println("Reading from log file: " + logFileName);
+            //System.out.println("Reading from log file: " + logFileName);
             ImplementationRuntimeLogger.readData(this);
         } else {
-            System.out.println("Probing skeleton implementation");
-            probeSkeletonImplementation();
-            ImplementationRuntimeLogger.saveData(this);
+            //System.out.println("Probing skeleton implementation");
+            //probeSkeletonImplementation();
+            //ImplementationRuntimeLogger.saveData(this);
         }
     }
 
@@ -57,6 +57,7 @@ public abstract class DaCSkeletonAbstract<P, S> {
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
+                    System.out.println(line);
                     String[] lineValues = line.split(" ");
                     switch (lineValues[0]) {
                         case "SOLVER": solverRuntimes.put(Integer.parseInt(lineValues[1]), Long.valueOf(lineValues[2])); break;
@@ -87,8 +88,6 @@ public abstract class DaCSkeletonAbstract<P, S> {
         solverBestFitModel = modelFitterSolver.fitModel();
         dividerBestFitModel = modelFitterDivider.fitModel();
         combinerBestFitModel = modelFitterCombiner.fitModel();
-
-
     }
 
     private int calculateGranularityNaive(P problem) {
