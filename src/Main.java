@@ -1,6 +1,7 @@
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -17,17 +18,25 @@ public class Main {
 //        System.out.println(Arrays.toString(result));
 
 
-        StrassensMatrixMultiplicationImpl strassensMatrixMultiplication = new StrassensMatrixMultiplicationImpl();
-        strassensMatrixMultiplication.probeSkeletonImplementation();
-
-        int[][] matrixA = createMatrix(1024);
-        int[][] matrixB = createMatrix(1024);
-        ArrayList<int[][]> matrices = new ArrayList<>(Arrays.asList(matrixA, matrixB));
-
-        for (int i = 3; i < 10; i++) {
-            int[][] result = strassensMatrixMultiplication.DaCSolveWithGranularity(matrices, i);
-        }
+//        StrassensMatrixMultiplicationImpl strassensMatrixMultiplication = new StrassensMatrixMultiplicationImpl();
+//        strassensMatrixMultiplication.probeSkeletonImplementation();
+//
+//        int[][] matrixA = createMatrix(1024);
+//        int[][] matrixB = createMatrix(1024);
+//        ArrayList<int[][]> matrices = new ArrayList<>(Arrays.asList(matrixA, matrixB));
+//
+//        for (int i = 3; i < 10; i++) {
+//            int[][] result = strassensMatrixMultiplication.DaCSolveWithGranularity(matrices, i);
+//        }
         //Do stuff with skeleton
+
+        Path filePath = Path.of("src/MergeSortImpl.java");
+        String classHexCode = ImplementationRuntimeLogger.hashFile(filePath);
+        if (classHexCode != null) {
+            System.out.println("Hash: " + classHexCode);
+        } else {
+            System.out.println("Error hashing file");
+        }
     }
 
     private static int[] randomArrayGenerator(int size) {

@@ -13,7 +13,7 @@ public abstract class DaCSkeletonAbstract<P, S> {
     protected abstract Function<List<S>, S> getSolutionCombiner();
     protected abstract Function<P, Integer> getProblemQuantifier();
     protected abstract Function<Integer, P> getProblemGenerator();
-    protected abstract int getGranularity();
+   
 
     private ModelFitter.BestFitModel solverBestFitModel;
     private ModelFitter.BestFitModel dividerBestFitModel;
@@ -77,7 +77,8 @@ public abstract class DaCSkeletonAbstract<P, S> {
         solverBestFitModel = modelFitterSolver.fitModel();
         dividerBestFitModel = modelFitterDivider.fitModel();
         combinerBestFitModel = modelFitterCombiner.fitModel();
-        
+
+
     }
 
     private int calculateGranularityNaive(P problem) {
