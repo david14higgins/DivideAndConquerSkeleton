@@ -14,9 +14,9 @@ public abstract class DaCSkeletonAbstract<P, S> {
     protected abstract Function<P, Integer> getProblemQuantifier();
     protected abstract Function<Integer, P> getProblemGenerator();
 
-    public ModelFitter.BestFitModel solverBestFitModel;
-    public ModelFitter.BestFitModel dividerBestFitModel;
-    public ModelFitter.BestFitModel combinerBestFitModel;
+    private ModelFitter.BestFitModel solverBestFitModel;
+    private ModelFitter.BestFitModel dividerBestFitModel;
+    private ModelFitter.BestFitModel combinerBestFitModel;
 
     public DaCSkeletonAbstract() {
         String className = getClass().getName();
@@ -41,8 +41,6 @@ public abstract class DaCSkeletonAbstract<P, S> {
             String javaHome = System.getProperty("java.home");
             String javaExec = javaHome + "/bin/java";
             String className = getClass().getName();
-
-            System.out.println(className);
 
             ProcessBuilder processBuilder = new ProcessBuilder(
                     javaExec,
@@ -202,6 +200,32 @@ public abstract class DaCSkeletonAbstract<P, S> {
             System.out.println("Skeleton implementation must be probed before DaC applied");
             return null;
         }
+    }
+
+    //--------- Getters and Setters ---------
+
+    public ModelFitter.BestFitModel getSolverBestFitModel() {
+        return solverBestFitModel;
+    }
+
+    public ModelFitter.BestFitModel getDividerBestFitModel() {
+        return dividerBestFitModel;
+    }
+
+    public ModelFitter.BestFitModel getCombinerBestFitModel() {
+        return combinerBestFitModel;
+    }
+
+    public void setSolverBestFitModel(ModelFitter.BestFitModel solverBestFitModel) {
+        this.solverBestFitModel = solverBestFitModel;
+    }
+
+    public void setDividerBestFitModel(ModelFitter.BestFitModel dividerBestFitModel) {
+        this.dividerBestFitModel = dividerBestFitModel;
+    }
+
+    public void setCombinerBestFitModel(ModelFitter.BestFitModel combinerBestFitModel) {
+        this.combinerBestFitModel = combinerBestFitModel;
     }
 
 }

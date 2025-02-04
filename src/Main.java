@@ -10,33 +10,15 @@ public class Main {
 
 
     public static void main(String[] args) {
-//        MergeSortImpl mergeSortImpl = new MergeSortImpl();
-//        mergeSortImpl.probeSkeletonImplementation();
-//        int arraySize = 10000;
-//        int[] inputArray = randomArrayGenerator(arraySize);
-//        int[] result = mergeSortImpl.DaCSolve(inputArray);
-//        System.out.println(Arrays.toString(result));
 
         StrassensMatrixMultiplicationImpl strassensMatrixMultiplication = new StrassensMatrixMultiplicationImpl();
-        strassensMatrixMultiplication.probeSkeletonImplementation();
-        System.out.println("Logging implementation");
-        ImplementationRuntimeLogger.saveData(strassensMatrixMultiplication);
-//        int[][] matrixA = createMatrix(1024);
-//        int[][] matrixB = createMatrix(1024);
-//        ArrayList<int[][]> matrices = new ArrayList<>(Arrays.asList(matrixA, matrixB));
-//
-//        for (int i = 3; i < 10; i++) {
-//            int[][] result = strassensMatrixMultiplication.DaCSolveWithGranularity(matrices, i);
-//        }
-        //Do stuff with skeleton
 
-//        Path filePath = Path.of("src/MergeSortImpl.java");
-//        String classHexCode = ImplementationRuntimeLogger.hashFile(filePath);
-//        if (classHexCode != null) {
-//            System.out.println("Hash: " + classHexCode);
-//        } else {
-//            System.out.println("Error hashing file");
-//        }
+        int[][] matrixA = createMatrix(1024);
+        int[][] matrixB = createMatrix(1024);
+        ArrayList<int[][]> matrices = new ArrayList<>(Arrays.asList(matrixA, matrixB));
+
+        strassensMatrixMultiplication.DaCSolve(matrices);
+
     }
 
     private static int[] randomArrayGenerator(int size) {

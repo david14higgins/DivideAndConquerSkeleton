@@ -169,4 +169,18 @@ public class ModelFitter {
 
         return bestFit;
     }
+
+    public static BestFitModel modelFromFile(Map<Integer, Long> data, String modelName) {
+        return switch (modelName) {
+            case ("Constant") -> new BestFitModel(new CachedModel(constantModel(data), data), 0, modelName);
+            case ("Logarithmic") -> new BestFitModel(new CachedModel(logarithmicModel(data), data), 0, modelName);
+            case ("Linear") -> new BestFitModel(new CachedModel(linearModel(data), data), 0, modelName);
+            case ("Exponential") -> new BestFitModel(new CachedModel(exponentialModel(data), data), 0, modelName);
+            case ("Root") -> new BestFitModel(new CachedModel(rootModel(data), data), 0, modelName);
+            default -> {
+                System.out.println("Model not found");
+                yield null;
+            }
+        };
+    }
 }
