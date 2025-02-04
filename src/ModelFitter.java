@@ -6,7 +6,7 @@ public class ModelFitter {
 
     public static class CachedModel implements Model {
         private final Model baseModel;
-        private final Map<Integer, Long> cache;
+        public final Map<Integer, Long> cache;
 
         public CachedModel(Model baseModel, Map<Integer, Long> cache) {
             this.baseModel = baseModel;
@@ -24,12 +24,12 @@ public class ModelFitter {
     }
 
     public static class BestFitModel {
-        public Model model;
+        public CachedModel cachedModel;
         public long error;
         public String modelName;
 
-        public BestFitModel(Model model, long error, String modelName) {
-            this.model = model;
+        public BestFitModel(CachedModel cachedModel, long error, String modelName) {
+            this.cachedModel = cachedModel;
             this.error = error;
             this.modelName = modelName;
         }

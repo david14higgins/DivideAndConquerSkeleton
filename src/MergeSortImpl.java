@@ -132,11 +132,4 @@ public class MergeSortImpl extends DaCSkeletonAbstract<int[], int[]>{
         }
         return values;
     }
-
-    @Override
-    protected int getGranularity() {
-        return 10;
-    }
-
-
 }

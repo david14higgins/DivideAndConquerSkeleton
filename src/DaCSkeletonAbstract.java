@@ -13,11 +13,11 @@ public abstract class DaCSkeletonAbstract<P, S> {
     protected abstract Function<List<S>, S> getSolutionCombiner();
     protected abstract Function<P, Integer> getProblemQuantifier();
     protected abstract Function<Integer, P> getProblemGenerator();
-   
 
-    private ModelFitter.BestFitModel solverBestFitModel;
-    private ModelFitter.BestFitModel dividerBestFitModel;
-    private ModelFitter.BestFitModel combinerBestFitModel;
+
+    public ModelFitter.BestFitModel solverBestFitModel;
+    public ModelFitter.BestFitModel dividerBestFitModel;
+    public ModelFitter.BestFitModel combinerBestFitModel;
 
     public void probeSkeletonImplementation() {
         HashMap<Integer, Long> solverRuntimes = new HashMap<>();
@@ -119,12 +119,12 @@ public abstract class DaCSkeletonAbstract<P, S> {
 
         while(!terminate) {
             if (currentProblemSize <= granularity) { // Base solutions
-                double solverSequentialRuntime = solverBestFitModel.model.predict(currentProblemSize);
+                double solverSequentialRuntime = solverBestFitModel.cachedModel.predict(currentProblemSize);
                 estimatedRuntime += solverSequentialRuntime * activeSubproblems / Math.min(activeSubproblems, parallelism);
                 terminate = true;
             } else { // Divide and Combine costs
-                double dividerSequentialRuntime = dividerBestFitModel.model.predict(currentProblemSize);
-                double combinerSequentialRuntime = combinerBestFitModel.model.predict(currentProblemSize);
+                double dividerSequentialRuntime = dividerBestFitModel.cachedModel.predict(currentProblemSize);
+                double combinerSequentialRuntime = combinerBestFitModel.cachedModel.predict(currentProblemSize);
 
                 estimatedRuntime += dividerSequentialRuntime * activeSubproblems / Math.min(activeSubproblems, parallelism);
                 estimatedRuntime += combinerSequentialRuntime * activeSubproblems / Math.min(activeSubproblems, parallelism);

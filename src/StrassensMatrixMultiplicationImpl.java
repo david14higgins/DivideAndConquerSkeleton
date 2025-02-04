@@ -146,11 +146,6 @@ public class StrassensMatrixMultiplicationImpl extends DaCSkeletonAbstract<List<
         return StrassensMatrixMultiplicationImpl::problemGenerator;
     }
 
-    @Override
-    protected int getGranularity() {
-        return 5;
-    }
-
     // ----- Helper Methods -----
 
     // Function to sub two matrices

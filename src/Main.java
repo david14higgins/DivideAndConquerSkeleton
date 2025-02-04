@@ -20,7 +20,9 @@ public class Main {
 
 //        StrassensMatrixMultiplicationImpl strassensMatrixMultiplication = new StrassensMatrixMultiplicationImpl();
 //        strassensMatrixMultiplication.probeSkeletonImplementation();
-//
+//        long predict5 = strassensMatrixMultiplication.dividerBestFitModel.cachedModel.predict(5);
+//        System.out.println("Predicted divide runtime for granularity 5: " + predict5);
+
 //        int[][] matrixA = createMatrix(1024);
 //        int[][] matrixB = createMatrix(1024);
 //        ArrayList<int[][]> matrices = new ArrayList<>(Arrays.asList(matrixA, matrixB));
@@ -30,13 +32,13 @@ public class Main {
 //        }
         //Do stuff with skeleton
 
-        Path filePath = Path.of("src/MergeSortImpl.java");
-        String classHexCode = ImplementationRuntimeLogger.hashFile(filePath);
-        if (classHexCode != null) {
-            System.out.println("Hash: " + classHexCode);
-        } else {
-            System.out.println("Error hashing file");
-        }
+//        Path filePath = Path.of("src/MergeSortImpl.java");
+//        String classHexCode = ImplementationRuntimeLogger.hashFile(filePath);
+//        if (classHexCode != null) {
+//            System.out.println("Hash: " + classHexCode);
+//        } else {
+//            System.out.println("Error hashing file");
+//        }
     }
 
     private static int[] randomArrayGenerator(int size) {
