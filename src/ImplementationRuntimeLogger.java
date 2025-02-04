@@ -3,7 +3,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
 import java.util.Map;
 
 public class ImplementationRuntimeLogger {
@@ -39,7 +38,7 @@ public class ImplementationRuntimeLogger {
         }
     }
 
-    public static void saveData(DaCSkeletonAbstract<?, ?> skeleton) {
+    public static void saveData(DaCSkeleton<?, ?> skeleton) {
         // Define the directory path and file name
         Path dirPath = Path.of("ImplementationLogs");
         Path fileName = dirPath.resolve(hashFile(Path.of("src/" + skeleton.getClass().getName() + ".java")) + ".dat");
@@ -65,7 +64,7 @@ public class ImplementationRuntimeLogger {
         }
     }
 
-    public static void readData(DaCSkeletonAbstract<?, ?> skeleton) {
+    public static void readData(DaCSkeleton<?, ?> skeleton) {
         // Define the directory path and file name
         Path dirPath = Path.of("ImplementationLogs");
         Path fileName = dirPath.resolve(hashFile(Path.of("src/" + skeleton.getClass().getName() + ".java")) + ".dat");

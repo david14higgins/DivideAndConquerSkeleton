@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.function.Function;
 
-public class StrassensMatrixMultiplicationImpl extends DaCSkeletonAbstract<List<int[][]>, int[][]>{
+public class StrassensMatrixMultiplicationImpl extends DaCSkeleton<List<int[][]>, int[][]> {
     // Base case compute method
     private static int[][] naiveMultiply(List<int[][]> matrices) {
         int[][] matrixA = matrices.get(0);

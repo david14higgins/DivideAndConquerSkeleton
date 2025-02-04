@@ -1,33 +1,17 @@
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
 
-public class MergeSort {
+public class MergeSort extends DaCSkeleton<int[], int[]> {
 
-    public void execute() {
-//        int[] problem = new int[] {61, 47, 12, 91, 4, 28, 86, 39, 58, 32,
-//                88, 35, 37, 46, 93, 25, 20, 30, 16, 45,
-//                8, 36, 72, 63, 57, 52, 75, 66, 78, 81,
-//                96, 55, 2, 51, 80, 7, 34, 38, 50, 9,
-//                22, 48, 95, 10, 83, 77, 54, 29, 71, 65};
-        DaCSkeleton<int[], int[]> mergesortTask = new DaCSkeleton<>(
-                MergeSort::bubblesort,
-                MergeSort::splitArray,
-                MergeSort::joinArray,
-                MergeSort::arraySizeQuantifier,
-                MergeSort::randomArrayGenerator,
-                10);
-
-
-//        ForkJoinPool pool = new ForkJoinPool();
-//        int[] result = pool.invoke(mergesortTask);
-//        System.out.println(Arrays.toString(result));
-        //System.out.println(Arrays.toString(mergesortTask.solveProblem(problem)));
+    @Override
+    protected Function<int[], int[]> getProblemSolver() {
+        return MergeSort::bubblesort;
     }
 
     private static int[] bubblesort(int[] array) {
         int n = array.length;
-
         // Create a copy of the original array to sort
         int[] sortedArray = Arrays.copyOf(array, n);
 
@@ -59,6 +43,11 @@ public class MergeSort {
         return sortedArray;
     }
 
+    @Override
+    protected Function<int[], List<int[]>> getSubproblemGenerator() {
+        return MergeSort::splitArray;
+    }
+
     private static List<int[]> splitArray(int[] array) {
         int mid = array.length / 2;
 
@@ -79,6 +68,11 @@ public class MergeSort {
         result.add(rightArray);
 
         return result;
+    }
+
+    @Override
+    protected Function<List<int[]>, int[]> getSolutionCombiner() {
+        return MergeSort::joinArray;
     }
 
     private static int[] joinArray(List<int[]> listOfArrays) {
@@ -116,8 +110,19 @@ public class MergeSort {
         return result;
     }
 
+    @Override
+    protected Function<int[], Integer> getProblemQuantifier() {
+        return MergeSort::arraySizeQuantifier;
+    }
+
     private static int arraySizeQuantifier(int[] array) {
         return array.length;
+    }
+
+
+    @Override
+    protected Function<Integer, int[]> getProblemGenerator() {
+        return MergeSort::randomArrayGenerator;
     }
 
     private static int[] randomArrayGenerator(int size) {
