@@ -14,10 +14,22 @@ public abstract class DaCSkeletonAbstract<P, S> {
     protected abstract Function<P, Integer> getProblemQuantifier();
     protected abstract Function<Integer, P> getProblemGenerator();
 
-
     public ModelFitter.BestFitModel solverBestFitModel;
     public ModelFitter.BestFitModel dividerBestFitModel;
     public ModelFitter.BestFitModel combinerBestFitModel;
+
+    public DaCSkeletonAbstract() {
+        String className = getClass().getName();
+        String logFileName = ImplementationRuntimeLogger.implementationLogged(className);
+        if (logFileName != null) {
+            System.out.println("Reading from log file: " + logFileName);
+            ImplementationRuntimeLogger.readData(this);
+        } else {
+            System.out.println("Probing skeleton implementation");
+            probeSkeletonImplementation();
+            ImplementationRuntimeLogger.saveData(this);
+        }
+    }
 
     public void probeSkeletonImplementation() {
         HashMap<Integer, Long> solverRuntimes = new HashMap<>();

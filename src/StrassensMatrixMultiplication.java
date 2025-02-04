@@ -83,6 +83,7 @@ public class StrassensMatrixMultiplication {
     private static int[][] naiveMultiply(List<int[][]> matrices) {
         int[][] matrixA = matrices.get(0);
         int[][] matrixB = matrices.get(1);
+        int change = 10;
 
         // Check if matrices are compatible for multiplication
         if (matrixA[0].length != matrixB.length) {
