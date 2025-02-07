@@ -12,13 +12,13 @@ public class Main {
     public static void main(String[] args) {
 
         StrassensMatrixMultiplicationImpl strassensMatrixMultiplication = new StrassensMatrixMultiplicationImpl();
-        strassensMatrixMultiplication.probeSkeletonImplementation();
+        //strassensMatrixMultiplication.probeSkeletonImplementation();
 
-//        int[][] matrixA = createMatrix(1024);
-//        int[][] matrixB = createMatrix(1024);
-//        ArrayList<int[][]> matrices = new ArrayList<>(Arrays.asList(matrixA, matrixB));
+        int[][] matrixA = createMatrix(1024);
+        int[][] matrixB = createMatrix(1024);
+        ArrayList<int[][]> matrices = new ArrayList<>(Arrays.asList(matrixA, matrixB));
 
-        //strassensMatrixMultiplication.DaCSolve(matrices);
+        strassensMatrixMultiplication.DaCSolve(matrices);
 
     }
 

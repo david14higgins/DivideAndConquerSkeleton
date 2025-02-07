@@ -79,7 +79,7 @@ public class ImplementationRuntimeLogger {
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(fileName.toFile()))) {
             String solverModelName = (String) ois.readObject(); // Read the solver model name
             Map<Integer, Long> solverCache = (Map<Integer, Long>) ois.readObject(); // Read the solver cache
-            skeleton.setCombinerBestFitModel(ModelFitter.modelFromFile(solverCache, solverModelName));
+            skeleton.setSolverBestFitModel(ModelFitter.modelFromFile(solverCache, solverModelName));
 
             String dividerModelName = (String) ois.readObject(); // Read the divider model name
             Map<Integer, Long> dividerCache = (Map<Integer, Long>) ois.readObject(); // Read the divider cache

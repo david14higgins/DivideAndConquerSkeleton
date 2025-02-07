@@ -19,16 +19,7 @@ public abstract class DaCSkeleton<P, S> {
     private ModelFitter.BestFitModel combinerBestFitModel;
 
     public DaCSkeleton() {
-//        String className = getClass().getName();
-//        String logFileName = ImplementationRuntimeLogger.implementationLogged(className);
-//        if (logFileName != null) {
-//            //System.out.println("Reading from log file: " + logFileName);
-//            ImplementationRuntimeLogger.readData(this);
-//        } else {
-//            //System.out.println("Probing skeleton implementation");
-//            //probeSkeletonImplementation();
-//            //ImplementationRuntimeLogger.saveData(this);
-//        }
+
     }
 
     public void probeSkeletonImplementation() {
@@ -57,7 +48,6 @@ public abstract class DaCSkeleton<P, S> {
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    System.out.println(line);
                     String[] lineValues = line.split(" ");
                     switch (lineValues[0]) {
                         case "SOLVER": solverRuntimes.put(Integer.parseInt(lineValues[1]), Long.valueOf(lineValues[2])); break;
@@ -69,7 +59,7 @@ public abstract class DaCSkeleton<P, S> {
             }
             process.waitFor(); // Wait for the process to complete
 
-            System.out.println("Still executing in Main.java");
+            //System.out.println("Still executing in Main.java");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -144,7 +134,7 @@ public abstract class DaCSkeleton<P, S> {
                 currentProblemSize = getProblemQuantifier().apply(currentProblem);
             }
         }
-        System.out.println("Granularity: " + granularity + ", Estimated Runtime: " + estimatedRuntime);
+        //System.out.println("Granularity: " + granularity + ", Estimated Runtime: " + estimatedRuntime);
         return estimatedRuntime;
     }
     /* ------ ASSUMPTIONS -------
@@ -157,6 +147,18 @@ public abstract class DaCSkeleton<P, S> {
      */
 
     public S DaCSolve(P problem) {
+        String className = getClass().getName();
+        String logFileName = ImplementationRuntimeLogger.implementationLogged(className);
+        if (logFileName != null) {
+            System.out.println("Reading from log file: " + logFileName);
+            ImplementationRuntimeLogger.readData(this);
+        } else {
+            System.out.println("Probing skeleton implementation");
+            probeSkeletonImplementation();
+            ImplementationRuntimeLogger.saveData(this);
+        }
+
+
         if(solverBestFitModel!= null && dividerBestFitModel != null && combinerBestFitModel != null) {
             int granularity = calculateGranularityNaive(problem);
             ForkJoinPool pool = new ForkJoinPool();
@@ -171,7 +173,7 @@ public abstract class DaCSkeleton<P, S> {
             long startTime = System.nanoTime();
             S result = pool.invoke(daCRecursiveTask);
             long executionTime = System.nanoTime() - startTime;
-            System.out.println("Actual Execution Time: " + executionTime);
+            //System.out.println("Actual Execution Time: " + executionTime);
             return result;
         } else {
             System.out.println("Skeleton implementation must be probed before DaC applied");
@@ -193,7 +195,7 @@ public abstract class DaCSkeleton<P, S> {
             long startTime = System.nanoTime();
             S result = pool.invoke(daCRecursiveTask);
             long executionTime = System.nanoTime() - startTime;
-            System.out.println("Granularity: " + granularity + ", Actual Execution Time: " + executionTime);
+           // System.out.println("Granularity: " + granularity + ", Actual Execution Time: " + executionTime);
             return result;
         } else {
             System.out.println("Skeleton implementation must be probed before DaC applied");
