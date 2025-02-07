@@ -79,15 +79,15 @@ public class ImplementationRuntimeLogger {
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(fileName.toFile()))) {
             String solverModelName = (String) ois.readObject(); // Read the solver model name
             Map<Integer, Long> solverCache = (Map<Integer, Long>) ois.readObject(); // Read the solver cache
-            skeleton.setSolverBestFitModel(ModelFitter.modelFromFile(solverCache, solverModelName));
+            skeleton.setSolverBestFitModel(ModelFitter2.modelFromFile(solverCache, solverModelName));
 
             String dividerModelName = (String) ois.readObject(); // Read the divider model name
             Map<Integer, Long> dividerCache = (Map<Integer, Long>) ois.readObject(); // Read the divider cache
-            skeleton.setDividerBestFitModel(ModelFitter.modelFromFile(dividerCache, dividerModelName));
+            skeleton.setDividerBestFitModel(ModelFitter2.modelFromFile(dividerCache, dividerModelName));
 
             String combinerModelName = (String) ois.readObject(); // Read the combiner model name
             Map<Integer, Long> combinerCache = (Map<Integer, Long>) ois.readObject(); // Read the combiner cache
-            skeleton.setCombinerBestFitModel(ModelFitter.modelFromFile(combinerCache, combinerModelName));
+            skeleton.setCombinerBestFitModel(ModelFitter2.modelFromFile(combinerCache, combinerModelName));
 
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();

@@ -14,9 +14,9 @@ public abstract class DaCSkeleton<P, S> {
     protected abstract Function<P, Integer> getProblemQuantifier();
     protected abstract Function<Integer, P> getProblemGenerator();
 
-    private ModelFitter.BestFitModel solverBestFitModel;
-    private ModelFitter.BestFitModel dividerBestFitModel;
-    private ModelFitter.BestFitModel combinerBestFitModel;
+    private ModelFitter2.BestFitModel solverBestFitModel;
+    private ModelFitter2.BestFitModel dividerBestFitModel;
+    private ModelFitter2.BestFitModel combinerBestFitModel;
 
     public DaCSkeleton() {
 
@@ -70,9 +70,9 @@ public abstract class DaCSkeleton<P, S> {
         System.out.println(combinerRuntimes);
 
         // Create an instance of ModelFitter with the given data
-        ModelFitter modelFitterSolver = new ModelFitter(solverRuntimes);
-        ModelFitter modelFitterDivider = new ModelFitter(dividerRuntimes);
-        ModelFitter modelFitterCombiner = new ModelFitter(combinerRuntimes);
+        ModelFitter2 modelFitterSolver = new ModelFitter2(solverRuntimes);
+        ModelFitter2 modelFitterDivider = new ModelFitter2(dividerRuntimes);
+        ModelFitter2 modelFitterCombiner = new ModelFitter2(combinerRuntimes);
 
         // Fit the models for each runtime dataset
         solverBestFitModel = modelFitterSolver.fitModel();
@@ -163,7 +163,7 @@ public abstract class DaCSkeleton<P, S> {
             long startTime = System.nanoTime();
             S result = pool.invoke(daCRecursiveTask);
             long executionTime = System.nanoTime() - startTime;
-            //System.out.println("Actual Execution Time: " + executionTime);
+            System.out.println("Actual Execution Time: " + executionTime);
             return result;
         } else {
             System.out.println("Skeleton implementation must be probed before DaC applied");
@@ -185,7 +185,7 @@ public abstract class DaCSkeleton<P, S> {
             long startTime = System.nanoTime();
             S result = pool.invoke(daCRecursiveTask);
             long executionTime = System.nanoTime() - startTime;
-           // System.out.println("Granularity: " + granularity + ", Actual Execution Time: " + executionTime);
+            System.out.println("Granularity: " + granularity + ", Actual Execution Time: " + executionTime);
             return result;
         } else {
             System.out.println("Skeleton implementation must be probed before DaC applied");
@@ -208,27 +208,27 @@ public abstract class DaCSkeleton<P, S> {
 
     //--------- Getters and Setters ---------
 
-    public ModelFitter.BestFitModel getSolverBestFitModel() {
+    public ModelFitter2.BestFitModel getSolverBestFitModel() {
         return solverBestFitModel;
     }
 
-    public ModelFitter.BestFitModel getDividerBestFitModel() {
+    public ModelFitter2.BestFitModel getDividerBestFitModel() {
         return dividerBestFitModel;
     }
 
-    public ModelFitter.BestFitModel getCombinerBestFitModel() {
+    public ModelFitter2.BestFitModel getCombinerBestFitModel() {
         return combinerBestFitModel;
     }
 
-    public void setSolverBestFitModel(ModelFitter.BestFitModel solverBestFitModel) {
+    public void setSolverBestFitModel(ModelFitter2.BestFitModel solverBestFitModel) {
         this.solverBestFitModel = solverBestFitModel;
     }
 
-    public void setDividerBestFitModel(ModelFitter.BestFitModel dividerBestFitModel) {
+    public void setDividerBestFitModel(ModelFitter2.BestFitModel dividerBestFitModel) {
         this.dividerBestFitModel = dividerBestFitModel;
     }
 
-    public void setCombinerBestFitModel(ModelFitter.BestFitModel combinerBestFitModel) {
+    public void setCombinerBestFitModel(ModelFitter2.BestFitModel combinerBestFitModel) {
         this.combinerBestFitModel = combinerBestFitModel;
     }
 
