@@ -37,14 +37,14 @@ public class MethodProber<P, S> {
             prober.readProblemQuantifier(clazz, instance);
             prober.readProblemGenerator(clazz, instance);
 
-            prober.probingAlgorithm();
+            prober.probingAlgorithmGrowth();
 
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public void probingAlgorithm() {
+    public void probingAlgorithmIterative() {
         // Probing parameters
         final int MAX_SAMPLES = 1000, ITERATIONS_PER_QUANTITY = 3, TIMEOUT = 60;
 
@@ -109,6 +109,87 @@ public class MethodProber<P, S> {
             numSamples++;
         }
     }
+
+    public void probingAlgorithmGrowth() {
+        // Probing parameters
+        final int MAX_SAMPLES = 1000, ITERATIONS_PER_QUANTITY = 3, TIMEOUT = 60;
+
+        // Runtime state
+        boolean timeoutTriggered = false;
+        int problemQuantity = 1, numSamples = 0;
+        long previousAvgRuntime = 0;
+
+        while (!timeoutTriggered && numSamples <= MAX_SAMPLES) {
+            // Generate the problem
+            P problem = problemGenerator.apply(problemQuantity);
+
+            long solverAccumulativeRuntime = 0;
+            long dividerAccumulativeRuntime = 0;
+            long combinerAccumulativeRuntime = 0;
+
+            for (int i = 0; i < ITERATIONS_PER_QUANTITY; i++) {
+                ExecutorService executor = Executors.newSingleThreadExecutor();
+
+                // Measure `problemSolver`
+                Future<S> solverFuture = executor.submit(() -> problemSolver.apply(problem));
+                try {
+                    long solverStart = System.nanoTime();
+                    S solution = solverFuture.get(TIMEOUT, TimeUnit.SECONDS);
+                    solverAccumulativeRuntime += System.nanoTime() - solverStart;
+
+                    // Measure `subproblemGenerator`
+                    long subproblemStart = System.nanoTime();
+                    List<P> subproblems = subproblemGenerator.apply(problem);
+                    dividerAccumulativeRuntime += System.nanoTime() - subproblemStart;
+
+                    // Measure `solutionCombiner`
+                    List<S> subproblemSolutions = subproblems.stream().map(problemSolver).toList();
+                    long combinerStart = System.nanoTime();
+                    S combinedSolution = solutionCombiner.apply(subproblemSolutions);
+                    combinerAccumulativeRuntime += System.nanoTime() - combinerStart;
+
+                } catch (TimeoutException e) {
+                    System.out.println("Timeout occurred for problem quantity: " + problemQuantity);
+                    timeoutTriggered = true;
+                    solverFuture.cancel(true);
+                    executor.shutdownNow();
+                    System.exit(-1);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    break;
+                } finally {
+                    executor.shutdownNow();
+                }
+            }
+
+            // Calculate average runtimes
+            long solverAvgRuntime = solverAccumulativeRuntime / ITERATIONS_PER_QUANTITY;
+            long subproblemAvgRuntime = dividerAccumulativeRuntime / ITERATIONS_PER_QUANTITY;
+            long combinerAvgRuntime = combinerAccumulativeRuntime / ITERATIONS_PER_QUANTITY;
+
+            System.out.printf("SOLVER %d %d%n", problemQuantity, solverAvgRuntime);
+            System.out.printf("DIVIDER %d %d%n", problemQuantity, subproblemAvgRuntime);
+            System.out.printf("COMBINER %d %d%n", problemQuantity, combinerAvgRuntime);
+
+            // Dynamically adjust the problem size based on the runtime growth
+            if (previousAvgRuntime > 0) {
+                // Compare current average runtime with the previous one
+                double growthFactor = (double) solverAvgRuntime / previousAvgRuntime;
+
+                // If runtime growth is slow (less than a threshold), increase the problem size more aggressively
+                if (growthFactor < 1.5) {
+                    problemQuantity *= 2;  // Double the problem size if growth is slow
+                } else {
+                    problemQuantity++;  // Otherwise, just increment normally
+                }
+            }
+
+            // Store current runtime for next iteration comparison
+            previousAvgRuntime = solverAvgRuntime;
+            numSamples++;
+        }
+    }
+
 
 
     public void readProblemSolver(Class<?> clazz, Object instance) {

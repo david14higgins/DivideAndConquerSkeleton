@@ -5,15 +5,15 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
 
 public class Main {
 
 
     public static void main(String[] args) {
 
-        //StrassensMatrixMultiplicationImpl strassensMatrixMultiplication = new StrassensMatrixMultiplicationImpl();
-        //strassensMatrixMultiplication.probeSkeletonImplementation();
-
+//        StrassensMatrixMultiplication strassensMatrixMultiplication = new StrassensMatrixMultiplication();
+//
 //        int[][] matrixA = createMatrix(1024);
 //        int[][] matrixB = createMatrix(1024);
 //        ArrayList<int[][]> matrices = new ArrayList<>(Arrays.asList(matrixA, matrixB));
@@ -25,6 +25,8 @@ public class Main {
         int[] values = randomArrayGenerator(1000000);
 
         int[] sortedValues = mergeSort.DaCSolve(values);
+
+        System.out.println(Arrays.toString(sortedValues));
 
     }
 
