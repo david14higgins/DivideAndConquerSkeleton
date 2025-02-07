@@ -147,17 +147,7 @@ public abstract class DaCSkeleton<P, S> {
      */
 
     public S DaCSolve(P problem) {
-        String className = getClass().getName();
-        String logFileName = ImplementationRuntimeLogger.implementationLogged(className);
-        if (logFileName != null) {
-            System.out.println("Reading from log file: " + logFileName);
-            ImplementationRuntimeLogger.readData(this);
-        } else {
-            System.out.println("Probing skeleton implementation");
-            probeSkeletonImplementation();
-            ImplementationRuntimeLogger.saveData(this);
-        }
-
+        checkImplementationLogs();
 
         if(solverBestFitModel!= null && dividerBestFitModel != null && combinerBestFitModel != null) {
             int granularity = calculateGranularityNaive(problem);
@@ -200,6 +190,19 @@ public abstract class DaCSkeleton<P, S> {
         } else {
             System.out.println("Skeleton implementation must be probed before DaC applied");
             return null;
+        }
+    }
+
+    private void checkImplementationLogs() {
+        String className = getClass().getName();
+        String logFileName = ImplementationRuntimeLogger.implementationLogged(className);
+        if (logFileName != null) {
+            System.out.println("Implementation logged, reading from log file: " + logFileName);
+            ImplementationRuntimeLogger.readData(this);
+        } else {
+            System.out.println("Implementation not logged, probing skeleton");
+            probeSkeletonImplementation();
+            ImplementationRuntimeLogger.saveData(this);
         }
     }
 

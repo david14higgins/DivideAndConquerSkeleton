@@ -10,6 +10,7 @@ public class StrassensMatrixMultiplicationImpl extends DaCSkeleton<List<int[][]>
     private static int[][] naiveMultiply(List<int[][]> matrices) {
         int[][] matrixA = matrices.get(0);
         int[][] matrixB = matrices.get(1);
+        int newImplementation = 0;
 
         // Check if matrices are compatible for multiplication
         if (matrixA[0].length != matrixB.length) {
