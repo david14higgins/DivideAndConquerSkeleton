@@ -198,7 +198,7 @@ public class MethodProber<P, S> {
         boolean timeoutTriggered = false;
         int problemQuantity = 1;
         long previousAvgRuntime = 0;
-        long timeoutNS = TIMEOUT * 1_000_000_000L;
+        long timeoutMicroSeconds = TIMEOUT * 1000000;
 
         ExecutorService executor = Executors.newSingleThreadExecutor();
 
@@ -215,33 +215,33 @@ public class MethodProber<P, S> {
                 try {
                     // Measure `subproblemGenerator`
                     Future<List<P>> subproblemsFuture = executor.submit(() -> subproblemGenerator.apply(problem));
-                    long subproblemStart = System.nanoTime();
-                    List<P> subproblems = subproblemsFuture.get(timeoutNS, TimeUnit.NANOSECONDS);
-                    long dividerRuntime = System.nanoTime() - subproblemStart;
+                    long subproblemStart = System.nanoTime() / 1000;
+                    List<P> subproblems = subproblemsFuture.get(timeoutMicroSeconds, TimeUnit.MICROSECONDS);
+                    long dividerRuntime = (System.nanoTime() / 1000) - subproblemStart;
                     dividerAccumulativeRuntime += dividerRuntime;
-                    timeoutNS -= dividerRuntime;
+                    timeoutMicroSeconds -= dividerRuntime;
 
                     // Solve subproblems and measure solver runtime
                     long innerSolverAccumulativeRuntime = 0;
                     List<S> subproblemSolutions = new ArrayList<>();
                     for (P subproblem : subproblems) {
-                        long solverStart = System.nanoTime();
                         Future<S> solverFuture = executor.submit(() -> problemSolver.apply(subproblem));
-                        S subSolution = solverFuture.get(timeoutNS, TimeUnit.NANOSECONDS);
-                        innerSolverAccumulativeRuntime += System.nanoTime() - solverStart;
+                        long solverStart = System.nanoTime() / 1000;
+                        S subSolution = solverFuture.get(timeoutMicroSeconds, TimeUnit.MICROSECONDS);
+                        innerSolverAccumulativeRuntime += (System.nanoTime() / 1000) - solverStart;
                         subproblemSolutions.add(subSolution);
                     }
                     long solverRuntime = innerSolverAccumulativeRuntime / subproblems.size();
                     solverAccumulativeRuntime += solverRuntime;
-                    timeoutNS -= innerSolverAccumulativeRuntime;
+                    timeoutMicroSeconds -= innerSolverAccumulativeRuntime;
 
                     // Measure `solutionCombiner`
                     Future<S> combinedSolutionFuture = executor.submit(() -> solutionCombiner.apply(subproblemSolutions));
-                    long combinerStart = System.nanoTime();
-                    S combinedSolution = combinedSolutionFuture.get(timeoutNS, TimeUnit.NANOSECONDS);
-                    long combinerRuntime = System.nanoTime() - combinerStart;
+                    long combinerStart = System.nanoTime() / 1000;
+                    S combinedSolution = combinedSolutionFuture.get(timeoutMicroSeconds, TimeUnit.MICROSECONDS);
+                    long combinerRuntime = (System.nanoTime() / 1000) - combinerStart;
                     combinerAccumulativeRuntime += combinerRuntime;
-                    timeoutNS -= combinerRuntime;
+                    timeoutMicroSeconds -= combinerRuntime;
                 } catch (TimeoutException e) {
                     System.out.println("Timeout occurred for problem quantity: " + problemQuantity);
                     timeoutTriggered = true;

@@ -18,11 +18,14 @@ public class Main {
         int[][] matrixB = createMatrix(1024);
         ArrayList<int[][]> matrices = new ArrayList<>(Arrays.asList(matrixA, matrixB));
 
-        strassensMatrixMultiplication.DaCSolve(matrices);
+        //int[][] result = strassensMatrixMultiplication.DaCSolve(matrices);
 
-//        for (int granularity = 1; granularity <= 10; granularity++) {
-//            strassensMatrixMultiplication.DaCSolveWithGranularity(matrices, granularity);
-//        }
+        //System.out.println(Arrays.deepToString(result));
+
+        for (int granularity = 10; granularity <= 10; granularity++) {
+             int[][] result = strassensMatrixMultiplication.DaCSolveWithGranularity(matrices, granularity);
+            System.out.println(Arrays.deepToString(result));
+        }
 //        MergeSort mergeSort = new MergeSort();
 //
 //        int[] values = randomArrayGenerator(1000000);
