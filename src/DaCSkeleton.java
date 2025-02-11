@@ -207,25 +207,20 @@ public abstract class DaCSkeleton<P, S> {
     }
 
     public S DaCSolveWithGranularity(P problem, int granularity) {
-        if(solverBestFitModel!= null && dividerBestFitModel != null && combinerBestFitModel != null) {
-            ForkJoinPool pool = new ForkJoinPool();
-            DaCRecursiveTask<P, S> daCRecursiveTask = new DaCRecursiveTask<>(
-                    getProblemSolver(),
-                    getSubproblemGenerator(),
-                    getSolutionCombiner(),
-                    getProblemQuantifier(),
-                    problem,
-                    granularity
-            );
-            long startTime = System.nanoTime();
-            S result = pool.invoke(daCRecursiveTask);
-            long executionTime = System.nanoTime() - startTime;
-            //System.out.println("Granularity: " + granularity + ", Actual Execution Time: " + executionTime);
-            return result;
-        } else {
-            System.out.println("Skeleton implementation must be probed before DaC applied");
-            return null;
-        }
+        ForkJoinPool pool = new ForkJoinPool();
+        DaCRecursiveTask<P, S> daCRecursiveTask = new DaCRecursiveTask<>(
+                getProblemSolver(),
+                getSubproblemGenerator(),
+                getSolutionCombiner(),
+                getProblemQuantifier(),
+                problem,
+                granularity
+        );
+        long startTime = System.nanoTime();
+        S result = pool.invoke(daCRecursiveTask);
+        long executionTime = System.nanoTime() - startTime;
+        System.out.println("Granularity: " + granularity + ", Actual Execution Time: " + executionTime);
+        return result;
     }
 
     private void checkImplementationLogs() {

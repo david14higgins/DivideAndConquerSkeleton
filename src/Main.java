@@ -12,21 +12,24 @@ public class Main {
 
     public static void main(String[] args) {
 
-//        StrassensMatrixMultiplication strassensMatrixMultiplication = new StrassensMatrixMultiplication();
+        StrassensMatrixMultiplication strassensMatrixMultiplication = new StrassensMatrixMultiplication();
+
+        int[][] matrixA = createMatrix(1024);
+        int[][] matrixB = createMatrix(1024);
+        ArrayList<int[][]> matrices = new ArrayList<>(Arrays.asList(matrixA, matrixB));
+
+        strassensMatrixMultiplication.DaCSolve(matrices);
+
+//        for (int granularity = 1; granularity <= 10; granularity++) {
+//            strassensMatrixMultiplication.DaCSolveWithGranularity(matrices, granularity);
+//        }
+//        MergeSort mergeSort = new MergeSort();
 //
-//        int[][] matrixA = createMatrix(1024);
-//        int[][] matrixB = createMatrix(1024);
-//        ArrayList<int[][]> matrices = new ArrayList<>(Arrays.asList(matrixA, matrixB));
+//        int[] values = randomArrayGenerator(1000000);
 //
-//        strassensMatrixMultiplication.DaCSolve(matrices);
-
-        MergeSort mergeSort = new MergeSort();
-
-        int[] values = randomArrayGenerator(1000000);
-
-        int[] sortedValues = mergeSort.DaCSolve(values);
-
-        System.out.println(Arrays.toString(sortedValues));
+//        int[] sortedValues = mergeSort.DaCSolve(values);
+//
+//        System.out.println(Arrays.toString(sortedValues));
 
     }
 
