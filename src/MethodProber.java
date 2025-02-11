@@ -11,6 +11,8 @@ public class MethodProber<P, S> {
     private Function<P, Integer> problemQuantifier;
     private Function<Integer, P> problemGenerator;
 
+    private int progress = 0;
+
     public static void main(String[] args) {
         if (args.length < 1) {
             System.out.println("Skeleton implementation classname required to run method prober");
@@ -192,13 +194,16 @@ public class MethodProber<P, S> {
 
     public void probingAlgorithmGrowth2() {
         // Probing parameters
-        final int ITERATIONS_PER_QUANTITY = 1, TIMEOUT = 120;
+        final int ITERATIONS_PER_QUANTITY = 5, TIMEOUT = 120;
 
         // Runtime state
         boolean timeoutTriggered = false;
-        int problemQuantity = 1;
+        int problemQuantity = 2;
+        int subproblemQuantity = -1;
         long previousAvgRuntime = 0;
         long timeoutMicroSeconds = TIMEOUT * 1000000;
+        long timeElapsedMicroSeconds = 0;
+        //outputProgress(timeElapsedMicroSeconds, timeoutMicroSeconds);
 
         ExecutorService executor = Executors.newSingleThreadExecutor();
 
@@ -216,10 +221,11 @@ public class MethodProber<P, S> {
                     // Measure `subproblemGenerator`
                     Future<List<P>> subproblemsFuture = executor.submit(() -> subproblemGenerator.apply(problem));
                     long subproblemStart = System.nanoTime() / 1000;
-                    List<P> subproblems = subproblemsFuture.get(timeoutMicroSeconds, TimeUnit.MICROSECONDS);
+                    List<P> subproblems = subproblemsFuture.get(timeoutMicroSeconds - timeElapsedMicroSeconds, TimeUnit.MICROSECONDS);
                     long dividerRuntime = (System.nanoTime() / 1000) - subproblemStart;
+                    subproblemQuantity = problemQuantifier.apply(subproblems.get(0));
                     dividerAccumulativeRuntime += dividerRuntime;
-                    timeoutMicroSeconds -= dividerRuntime;
+                    timeElapsedMicroSeconds += dividerRuntime;
 
                     // Solve subproblems and measure solver runtime
                     long innerSolverAccumulativeRuntime = 0;
@@ -227,21 +233,22 @@ public class MethodProber<P, S> {
                     for (P subproblem : subproblems) {
                         Future<S> solverFuture = executor.submit(() -> problemSolver.apply(subproblem));
                         long solverStart = System.nanoTime() / 1000;
-                        S subSolution = solverFuture.get(timeoutMicroSeconds, TimeUnit.MICROSECONDS);
+                        S subSolution = solverFuture.get(timeoutMicroSeconds - timeElapsedMicroSeconds, TimeUnit.MICROSECONDS);
                         innerSolverAccumulativeRuntime += (System.nanoTime() / 1000) - solverStart;
                         subproblemSolutions.add(subSolution);
                     }
                     long solverRuntime = innerSolverAccumulativeRuntime / subproblems.size();
                     solverAccumulativeRuntime += solverRuntime;
-                    timeoutMicroSeconds -= innerSolverAccumulativeRuntime;
+                    timeElapsedMicroSeconds += innerSolverAccumulativeRuntime;
+
 
                     // Measure `solutionCombiner`
                     Future<S> combinedSolutionFuture = executor.submit(() -> solutionCombiner.apply(subproblemSolutions));
                     long combinerStart = System.nanoTime() / 1000;
-                    S combinedSolution = combinedSolutionFuture.get(timeoutMicroSeconds, TimeUnit.MICROSECONDS);
+                    S combinedSolution = combinedSolutionFuture.get(timeoutMicroSeconds - timeElapsedMicroSeconds, TimeUnit.MICROSECONDS);
                     long combinerRuntime = (System.nanoTime() / 1000) - combinerStart;
                     combinerAccumulativeRuntime += combinerRuntime;
-                    timeoutMicroSeconds -= combinerRuntime;
+                    timeElapsedMicroSeconds += combinerRuntime;
                 } catch (TimeoutException e) {
                     System.out.println("Timeout occurred for problem quantity: " + problemQuantity);
                     timeoutTriggered = true;
@@ -252,13 +259,12 @@ public class MethodProber<P, S> {
                     break;
                 }
             }
-
             // Calculate average runtimes
             long solverAvgRuntime = solverAccumulativeRuntime / ITERATIONS_PER_QUANTITY;
             long subproblemAvgRuntime = dividerAccumulativeRuntime / ITERATIONS_PER_QUANTITY;
             long combinerAvgRuntime = combinerAccumulativeRuntime / ITERATIONS_PER_QUANTITY;
 
-            System.out.printf("SOLVER %d %d%n", problemQuantity, solverAvgRuntime);
+            System.out.printf("SOLVER %d %d%n", subproblemQuantity, solverAvgRuntime);
             System.out.printf("DIVIDER %d %d%n", problemQuantity, subproblemAvgRuntime);
             System.out.printf("COMBINER %d %d%n", problemQuantity, combinerAvgRuntime);
 
@@ -274,8 +280,11 @@ public class MethodProber<P, S> {
         executor.shutdown();
     }
 
-
-
+    private void outputProgress(long timeElapsed, long timeout) {
+        int newProgress = (int) (timeElapsed * 100 / timeout);
+        System.out.printf("PROGRESS %d%n", progress);
+        progress = newProgress;
+    }
 
     public void readProblemSolver(Class<?> clazz, Object instance) {
         try {

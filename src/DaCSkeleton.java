@@ -54,6 +54,7 @@ public abstract class DaCSkeleton<P, S> {
                         case "SOLVER": solverRuntimes.put(Integer.parseInt(lineValues[1]), Long.valueOf(lineValues[2])); break;
                         case "DIVIDER": dividerRuntimes.put(Integer.parseInt(lineValues[1]), Long.valueOf(lineValues[2])); break;
                         case "COMBINER": combinerRuntimes.put(Integer.parseInt(lineValues[1]), Long.valueOf(lineValues[2])); break;
+                        case "PROGRESS": outputProgress(Integer.parseInt(lineValues[1])); break;
                         default: break;
                     }
                 }
@@ -66,8 +67,12 @@ public abstract class DaCSkeleton<P, S> {
         }
 
         //Output read values
+        System.out.println();
+        System.out.println("Solver Runtimes: ");
         System.out.println(solverRuntimes);
+        System.out.println("Divider Runtimes: ");
         System.out.println(dividerRuntimes);
+        System.out.println("Combiner Runtimes: ");
         System.out.println(combinerRuntimes);
 
         // Create an instance of ModelFitter with the given data
@@ -79,6 +84,18 @@ public abstract class DaCSkeleton<P, S> {
         solverBestFitModel = modelFitterSolver.fitModel();
         dividerBestFitModel = modelFitterDivider.fitModel();
         combinerBestFitModel = modelFitterCombiner.fitModel();
+    }
+
+    private void outputProgress(int progress) {
+        final int barWidth = 30; // Total width of the progress bar
+        int filled = (progress * barWidth / 100); // Number of '#' characters
+        int empty = barWidth - filled; // Remaining '-' characters
+
+        // Construct the progress bar
+        String progressBar = "[" + "#".repeat(filled) + "-".repeat(empty) + "]";
+
+        // Clear the previous line and print the updated progress bar
+        System.out.print("\r" + progressBar + " " + progress + "%");
     }
 
     //Ternary search?
