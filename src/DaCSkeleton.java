@@ -135,7 +135,7 @@ public abstract class DaCSkeleton<P, S> {
         P currentProblem = problem;
         int currentProblemSize = getProblemQuantifier().apply(currentProblem);
         int activeSubproblems = 1;
-        int parallelism = 8; //Hardcoded for now
+        int parallelism = Runtime.getRuntime().availableProcessors();
         boolean terminate = false;
         double estimatedRuntime = 0;
 

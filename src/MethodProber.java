@@ -37,7 +37,7 @@ public class MethodProber<P, S> {
             prober.readProblemQuantifier(clazz, instance);
             prober.readProblemGenerator(clazz, instance);
 
-            prober.probingAlgorithmGrowth();
+            prober.probingAlgorithmGrowth2();
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -112,7 +112,7 @@ public class MethodProber<P, S> {
 
     public void probingAlgorithmGrowth() {
         // Probing parameters
-        final int MAX_SAMPLES = 1000, ITERATIONS_PER_QUANTITY = 3, TIMEOUT = 60;
+        final int MAX_SAMPLES = 1000, ITERATIONS_PER_QUANTITY = 3, TIMEOUT = 10;
 
         // Runtime state
         boolean timeoutTriggered = false;
@@ -151,7 +151,7 @@ public class MethodProber<P, S> {
                 } catch (TimeoutException e) {
                     System.out.println("Timeout occurred for problem quantity: " + problemQuantity);
                     timeoutTriggered = true;
-                    solverFuture.cancel(true);
+                    //solverFuture.cancel(true);
                     executor.shutdownNow();
                     System.exit(-1);
                 } catch (Exception e) {
@@ -189,6 +189,91 @@ public class MethodProber<P, S> {
             numSamples++;
         }
     }
+
+    public void probingAlgorithmGrowth2() {
+        // Probing parameters
+        final int ITERATIONS_PER_QUANTITY = 1, TIMEOUT = 120;
+
+        // Runtime state
+        boolean timeoutTriggered = false;
+        int problemQuantity = 1;
+        long previousAvgRuntime = 0;
+        long timeoutNS = TIMEOUT * 1_000_000_000L;
+
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+
+        while (!timeoutTriggered) {
+            // Generate the problem
+            P problem = problemGenerator.apply(problemQuantity);
+
+            long solverAccumulativeRuntime = 0;
+            long dividerAccumulativeRuntime = 0;
+            long combinerAccumulativeRuntime = 0;
+
+            for (int i = 0; i < ITERATIONS_PER_QUANTITY; i++) {
+
+                try {
+                    // Measure `subproblemGenerator`
+                    Future<List<P>> subproblemsFuture = executor.submit(() -> subproblemGenerator.apply(problem));
+                    long subproblemStart = System.nanoTime();
+                    List<P> subproblems = subproblemsFuture.get(timeoutNS, TimeUnit.NANOSECONDS);
+                    long dividerRuntime = System.nanoTime() - subproblemStart;
+                    dividerAccumulativeRuntime += dividerRuntime;
+                    timeoutNS -= dividerRuntime;
+
+                    // Solve subproblems and measure solver runtime
+                    long innerSolverAccumulativeRuntime = 0;
+                    List<S> subproblemSolutions = new ArrayList<>();
+                    for (P subproblem : subproblems) {
+                        long solverStart = System.nanoTime();
+                        Future<S> solverFuture = executor.submit(() -> problemSolver.apply(subproblem));
+                        S subSolution = solverFuture.get(timeoutNS, TimeUnit.NANOSECONDS);
+                        innerSolverAccumulativeRuntime += System.nanoTime() - solverStart;
+                        subproblemSolutions.add(subSolution);
+                    }
+                    long solverRuntime = innerSolverAccumulativeRuntime / subproblems.size();
+                    solverAccumulativeRuntime += solverRuntime;
+                    timeoutNS -= innerSolverAccumulativeRuntime;
+
+                    // Measure `solutionCombiner`
+                    Future<S> combinedSolutionFuture = executor.submit(() -> solutionCombiner.apply(subproblemSolutions));
+                    long combinerStart = System.nanoTime();
+                    S combinedSolution = combinedSolutionFuture.get(timeoutNS, TimeUnit.NANOSECONDS);
+                    long combinerRuntime = System.nanoTime() - combinerStart;
+                    combinerAccumulativeRuntime += combinerRuntime;
+                    timeoutNS -= combinerRuntime;
+                } catch (TimeoutException e) {
+                    System.out.println("Timeout occurred for problem quantity: " + problemQuantity);
+                    timeoutTriggered = true;
+                    executor.shutdownNow();
+                    System.exit(-1);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    break;
+                }
+            }
+
+            // Calculate average runtimes
+            long solverAvgRuntime = solverAccumulativeRuntime / ITERATIONS_PER_QUANTITY;
+            long subproblemAvgRuntime = dividerAccumulativeRuntime / ITERATIONS_PER_QUANTITY;
+            long combinerAvgRuntime = combinerAccumulativeRuntime / ITERATIONS_PER_QUANTITY;
+
+            System.out.printf("SOLVER %d %d%n", problemQuantity, solverAvgRuntime);
+            System.out.printf("DIVIDER %d %d%n", problemQuantity, subproblemAvgRuntime);
+            System.out.printf("COMBINER %d %d%n", problemQuantity, combinerAvgRuntime);
+
+            // Dynamically adjust the problem size based on the runtime growth
+            if (previousAvgRuntime > 0) {
+                double growthFactor = (double) solverAvgRuntime / previousAvgRuntime;
+                problemQuantity = (growthFactor < 1.5) ? problemQuantity * 2 : problemQuantity + 1;
+            }
+
+            previousAvgRuntime = solverAvgRuntime;
+        }
+
+        executor.shutdown();
+    }
+
 
 
 
