@@ -1,6 +1,7 @@
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 import java.util.function.Function;
 
 public class MergeSort extends DaCSkeleton<int[], int[]> {
@@ -114,22 +115,14 @@ public class MergeSort extends DaCSkeleton<int[], int[]> {
     protected Function<int[], Integer> getProblemQuantifier() {
         return MergeSort::arraySizeQuantifier;
     }
-
     private static int arraySizeQuantifier(int[] array) {
         return array.length;
     }
-
-
     @Override
     protected Function<Integer, int[]> getProblemGenerator() {
         return MergeSort::randomArrayGenerator;
     }
-
     private static int[] randomArrayGenerator(int size) {
-        int[] values = new int[size];
-        for (int i = 0; i < values.length; i++) {
-            values[i] = (int) (Math.random() * 101);
-        }
-        return values;
+        return new Random().ints(size, 0, 101).toArray();
     }
 }

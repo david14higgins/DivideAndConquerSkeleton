@@ -20,6 +20,7 @@ public class Main {
         ArrayList<int[][]> matrices = new ArrayList<>(Arrays.asList(matrixA, matrixB));
 
         int[][] result1 = strassensMatrixMultiplication.DaCSolve(matrices);
+
         //System.out.println("DaCSolve result:");
         //System.out.println(Arrays.deepToString(result1));
 

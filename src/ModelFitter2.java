@@ -1,6 +1,8 @@
+//import org.apache.commons.math4.legacy.fitting.*;
+//import org.apache.commons.math4.legacy.analysis.function.*;
+//import org.apache.commons.math4.legacy.stat.regression.SimpleRegression;
 import org.apache.commons.math4.legacy.fitting.*;
-import org.apache.commons.math4.legacy.analysis.function.*;
-import org.apache.commons.math4.legacy.stat.regression.SimpleRegression;
+import org.apache.commons.math4.legacy.stat.regression.*;
 import java.util.*;
 
 public class ModelFitter2 {
