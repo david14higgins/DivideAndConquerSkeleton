@@ -111,18 +111,18 @@ public class MergeSort extends DaCSkeleton<int[], int[]> {
         return result;
     }
 
-    @Override
-    protected Function<int[], Integer> getProblemQuantifier() {
-        return MergeSort::arraySizeQuantifier;
-    }
     private static int arraySizeQuantifier(int[] array) {
         return array.length;
     }
     @Override
-    protected Function<Integer, int[]> getProblemGenerator() {
-        return MergeSort::randomArrayGenerator;
+    protected Function<int[], Integer> getProblemQuantifier() {
+        return MergeSort::arraySizeQuantifier;
     }
     private static int[] randomArrayGenerator(int size) {
         return new Random().ints(size, 0, 101).toArray();
+    }
+    @Override
+    protected Function<Integer, int[]> getProblemGenerator() {
+        return MergeSort::randomArrayGenerator;
     }
 }
