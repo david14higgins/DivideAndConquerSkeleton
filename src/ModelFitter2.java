@@ -43,7 +43,7 @@ public class ModelFitter2 {
         this.data = data;
     }
 
-    private long calculateError(Model model) {
+    public long calculateError(Model model) {
         return data.entrySet().stream()
                 .mapToLong(e -> {
                     long predicted = model.predict(e.getKey());

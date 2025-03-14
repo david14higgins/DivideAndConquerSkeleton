@@ -41,7 +41,7 @@ public class ModelFitter {
         this.data = data;
     }
 
-    private long calculateError(Model model) {
+    public long calculateError(Model model) {
         long error = 0;
         for (Map.Entry<Integer, Long> entry : data.entrySet()) {
             int x = entry.getKey();

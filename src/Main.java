@@ -12,14 +12,21 @@ public class Main {
 
     public static void main(String[] args) {
 
-        StrassensMatrixMultiplication strassensMatrixMultiplication = new StrassensMatrixMultiplication();
+        ModelTesting modelTesting = new ModelTesting();
+        modelTesting.testConstantModel();
+        modelTesting.testLogarithmicModel();
+        modelTesting.testLinearModel();
+        modelTesting.testExponentialModels();
+        modelTesting.testRootModel();
 
-        int[][] matrixA = createMatrix(512);
-        int[][] matrixB = createMatrix(512);
-
-        ArrayList<int[][]> matrices = new ArrayList<>(Arrays.asList(matrixA, matrixB));
-
-        int[][] result1 = strassensMatrixMultiplication.DaCSolve(matrices);
+//        StrassensMatrixMultiplication strassensMatrixMultiplication = new StrassensMatrixMultiplication();
+//
+//        int[][] matrixA = createMatrix(512);
+//        int[][] matrixB = createMatrix(512);
+//
+//        ArrayList<int[][]> matrices = new ArrayList<>(Arrays.asList(matrixA, matrixB));
+//
+//        int[][] result1 = strassensMatrixMultiplication.DaCSolve(matrices);
 
         //System.out.println("DaCSolve result:");
         //System.out.println(Arrays.deepToString(result1));
