@@ -19,14 +19,14 @@ public class Main {
         modelTesting.testExponentialModels();
         modelTesting.testRootModel();
 
-//        StrassensMatrixMultiplication strassensMatrixMultiplication = new StrassensMatrixMultiplication();
-//
-//        int[][] matrixA = createMatrix(512);
-//        int[][] matrixB = createMatrix(512);
-//
-//        ArrayList<int[][]> matrices = new ArrayList<>(Arrays.asList(matrixA, matrixB));
-//
-//        int[][] result1 = strassensMatrixMultiplication.DaCSolve(matrices);
+        StrassensMatrixMultiplication strassensMatrixMultiplication = new StrassensMatrixMultiplication();
+
+        int[][] matrixA = createMatrix(256);
+        int[][] matrixB = createMatrix(256);
+
+        ArrayList<int[][]> matrices = new ArrayList<>(Arrays.asList(matrixA, matrixB));
+
+        int[][] result1 = strassensMatrixMultiplication.DaCSolve(matrices);
 
         //System.out.println("DaCSolve result:");
         //System.out.println(Arrays.deepToString(result1));

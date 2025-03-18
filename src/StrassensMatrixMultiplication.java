@@ -127,18 +127,42 @@ public class StrassensMatrixMultiplication extends DaCSkeleton<List<int[][]>, in
         return StrassensMatrixMultiplication::joinMatrices;
     }
 
+    // ----- Old Problem Generator and Quantifier -----
+
+//    private static int matrixSizeQuantifier(List<int[][]> matrices) {
+//        int sideLength = matrices.get(0).length;
+//        return (int) (Math.log(sideLength) / Math.log(2));
+//    }
+//    @Override
+//    protected Function<List<int[][]>, Integer> getProblemQuantifier() {
+//        return StrassensMatrixMultiplication::matrixSizeQuantifier;
+//    }
+//
+//    private static List<int[][]> problemGenerator(int dimensionPower) {
+//        int[][] matrixA = generateRandomMatrix((int) Math.pow(2, dimensionPower), 0, 1000);
+//        int[][] matrixB = generateRandomMatrix((int) Math.pow(2, dimensionPower), 0, 1000);
+//        return new ArrayList<>(Arrays.asList(matrixA, matrixB));
+//    }
+//
+//    @Override
+//    protected Function<Integer, List<int[][]>> getProblemGenerator() {
+//        return StrassensMatrixMultiplication::problemGenerator;
+//    }
+
+    // ----- New Problem Generator and Quantifier -----
+
     private static int matrixSizeQuantifier(List<int[][]> matrices) {
-        int sideLength = matrices.get(0).length;
-        return (int) (Math.log(sideLength) / Math.log(2));
+        return matrices.get(0).length;
     }
+
     @Override
     protected Function<List<int[][]>, Integer> getProblemQuantifier() {
         return StrassensMatrixMultiplication::matrixSizeQuantifier;
     }
 
-    private static List<int[][]> problemGenerator(int dimensionPower) {
-        int[][] matrixA = generateRandomMatrix((int) Math.pow(2, dimensionPower), 0, 1000);
-        int[][] matrixB = generateRandomMatrix((int) Math.pow(2, dimensionPower), 0, 1000);
+    private static List<int[][]> problemGenerator(int dimension) {
+        int[][] matrixA = generateRandomMatrix(dimension, 0, 1000);
+        int[][] matrixB = generateRandomMatrix(dimension, 0, 1000);
         return new ArrayList<>(Arrays.asList(matrixA, matrixB));
     }
 
@@ -146,6 +170,7 @@ public class StrassensMatrixMultiplication extends DaCSkeleton<List<int[][]>, in
     protected Function<Integer, List<int[][]>> getProblemGenerator() {
         return StrassensMatrixMultiplication::problemGenerator;
     }
+
 
     // ----- Helper Methods -----
 
