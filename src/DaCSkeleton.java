@@ -86,18 +86,7 @@ public abstract class DaCSkeleton<P, S> {
         combinerBestFitModel = modelFitterCombiner.fitModel();
     }
 
-    private void outputProgress(int progress) {
-        final int barWidth = 30; // Total width of the progress bar
-        int filled = (progress * barWidth / 100); // Number of '#' characters
-        int empty = barWidth - filled; // Remaining '-' characters
-
-        // Construct the progress bar
-        String progressBar = "[" + "#".repeat(filled) + "-".repeat(empty) + "]";
-
-        // Clear the previous line and print the updated progress bar
-        System.out.print("\r" + progressBar + " " + progress + "%");
-    }
-
+    
     //Ternary search?
     private int calculateGranularityIterative(P problem) {
         double lowestRuntime = Double.MAX_VALUE;

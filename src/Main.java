@@ -12,13 +12,6 @@ public class Main {
 
     public static void main(String[] args) {
 
-        ModelTesting modelTesting = new ModelTesting();
-        modelTesting.testConstantModel();
-        modelTesting.testLogarithmicModel();
-        modelTesting.testLinearModel();
-        modelTesting.testExponentialModels();
-        modelTesting.testRootModel();
-
         StrassensMatrixMultiplication strassensMatrixMultiplication = new StrassensMatrixMultiplication();
 
         int[][] matrixA = createMatrix(256);
