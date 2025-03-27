@@ -269,12 +269,13 @@ public class MethodProber<P, S> {
             System.out.printf("COMBINER %d %d%n", problemQuantity, combinerAvgRuntime);
 
             // Dynamically adjust the problem size based on the runtime growth
-            if (previousAvgRuntime > 0) {
-                double growthFactor = (double) solverAvgRuntime / previousAvgRuntime;
-                problemQuantity = (growthFactor < 1.5) ? problemQuantity * 2 : problemQuantity + 1;
-            }
-
-            previousAvgRuntime = solverAvgRuntime;
+//            if (previousAvgRuntime > 0) {
+//                double growthFactor = (double) solverAvgRuntime / previousAvgRuntime;
+//                problemQuantity = (growthFactor < 1.5) ? problemQuantity * 2 : problemQuantity + 1;
+//            }
+//
+//            previousAvgRuntime = solverAvgRuntime;
+            problemQuantity++;
         }
 
         executor.shutdown();
